@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">SpeakerReader</string>
+    <string name="fileChooseButtonText">请选择您想打开的文件</string>
+    <string name="welcomeWords">欢迎使用本app</string>
+    <string name="or">OR</string>
+    <string name="scanFilesButton">扫描本地所有支持文件</string>
+    <string name="recored">历史记录：</string>
+    <string name="backToPre">返回上一层</string>
+    <string name="title_activity_welcome">WelcomeActivity</string>
+    <string name="deleteItem">删除记录</string>
+    <string name="cleanAll">清空记录</string>
+    <string name="openRecord">打开</string>
+    <string name="pop">pop</string>
+</resources>
