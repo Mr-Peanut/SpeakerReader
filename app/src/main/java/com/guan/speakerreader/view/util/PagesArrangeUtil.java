@@ -166,5 +166,35 @@ public class PagesArrangeUtil {
             setRun(false);
         }
     }
+    public String measurePage(String content){
+        char[] buffer = new char[1];
+        float totalLineWidth = 0;
+        float totalRowHeight = 0;
+        int wordCount = 0;
+        Paint paint = mPaint;
+        float lineHeight = paint.descent() - paint.ascent();
+//        //读一行
+        while (totalRowHeight + lineHeight <= showHeight && wordCount <= content.length() - 1) {
+            while (totalLineWidth < showWidth && wordCount <= content.length() - 1) {
+                buffer[0] = content.charAt(wordCount);
+                float wordWith = paint.measureText(buffer, 0, 1);
+                if (totalLineWidth + wordWith >showWidth) {
+                    if (buffer[0] == '\n') {
+                        wordCount++;
+                    }
+                    break;
+                }
+                totalLineWidth += wordWith;
+                wordCount++;
+                if (buffer[0] == '\n')
+                    break;
+            }
+            totalRowHeight = totalRowHeight + lineHeight;
+//            System.err.println("totalRowHeight" + totalRowHeight);
+//            System.err.println("onDraw:" + stringBuffer);
+            totalLineWidth = 0;
+        }
+     return content.substring(0,wordCount);
+    }
 
 }

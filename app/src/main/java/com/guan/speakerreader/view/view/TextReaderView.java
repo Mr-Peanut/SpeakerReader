@@ -10,6 +10,8 @@ import android.text.TextPaint;
 import android.util.AttributeSet;
 import android.view.View;
 
+import com.guan.speakerreader.view.util.ContentController;
+
 /**
  * Created by guans on 2017/3/18.
  */
@@ -22,6 +24,7 @@ public class TextReaderView extends View {
     private int position;
     private StringBuffer stringBuffer;
     private int showCount;
+    private ContentController mContentController;
     public TextReaderView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
         mContext = context;
@@ -50,11 +53,10 @@ public class TextReaderView extends View {
 
     @Override
     protected void onDraw(Canvas canvas) {
-        System.err.println("第" + position + "页内容：" + mContent);
-
+      mContentController.getContent(position);
         if (mContent != null) {
             setContent(mContent, canvas);
-            System.err.println("第" + position + "页showCount：" + showCount);
+//            System.err.println("第" + position + "页showCount：" + showCount);
             drawFinishedIntent.putExtra("showCount", showCount);
             drawFinishedIntent.putExtra("position", position);
             mContext.sendBroadcast(drawFinishedIntent);
@@ -90,9 +92,9 @@ public class TextReaderView extends View {
                     break;
             }
             totalRowHeight = totalRowHeight + lineHeight;
-            System.err.println("totalRowHeight" + totalRowHeight);
+//            System.err.println("totalRowHeight" + totalRowHeight);
             canvas.drawText(stringBuffer.toString(), lineStartX, totalRowHeight + getPaddingTop(), mPaint);
-            System.err.println("onDraw:" + stringBuffer);
+//            System.err.println("onDraw:" + stringBuffer);
             stringBuffer.delete(0, stringBuffer.length());
             totalLineWidth = 0;
         }
@@ -124,5 +126,9 @@ public class TextReaderView extends View {
     protected void onDetachedFromWindow() {
         mContent = null;
         super.onDetachedFromWindow();
+    }
+
+    public void setmContentController(ContentController mContentController) {
+        this.mContentController = mContentController;
     }
 }
