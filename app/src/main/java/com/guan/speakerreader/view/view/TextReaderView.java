@@ -53,7 +53,14 @@ public class TextReaderView extends View {
 
     @Override
     protected void onDraw(Canvas canvas) {
-      mContentController.getContent(position);
+        System.err.println("第"+position+"页");
+        if( mContentController.getmPaint()==null){
+            mContentController.setmPaint(new Paint(mPaint));
+            mContentController.setShowHeight(getMeasuredHeight() - getPaddingTop() - getPaddingBottom());
+            mContentController.setShowWidth( getMeasuredWidth() - Math.max(getPaddingLeft(), getPaddingStart()) - Math.max(getPaddingEnd(), getPaddingRight()));
+            mContentController.initUtils();
+        }
+      mContent=mContentController.getContent(position);
         if (mContent != null) {
             setContent(mContent, canvas);
 //            System.err.println("第" + position + "页showCount：" + showCount);
@@ -62,6 +69,7 @@ public class TextReaderView extends View {
             mContext.sendBroadcast(drawFinishedIntent);
         }
         super.onDraw(canvas);
+        System.err.println("第"+position+"页");
     }
 
     private void setContent(final String content, Canvas canvas) {

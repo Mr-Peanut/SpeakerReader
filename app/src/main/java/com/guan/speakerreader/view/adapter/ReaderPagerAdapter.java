@@ -1,7 +1,6 @@
 package com.guan.speakerreader.view.adapter;
 
 import android.content.Context;
-import android.graphics.Paint;
 import android.support.v4.view.PagerAdapter;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -35,6 +34,7 @@ public class ReaderPagerAdapter extends PagerAdapter {
         this.mContext = mContext;
         this.filePath=filePath;
         viewList=new ArrayList<>();
+        contentController=new ContentController(filePath);
     }
 
     @Override
@@ -45,10 +45,9 @@ public class ReaderPagerAdapter extends PagerAdapter {
             view=viewList.remove(0).get();
         }
         if(view==null){
-            view= LayoutInflater.from(mContext).inflate(R.layout.page_layout,container);
-            textReaderView= (TextReaderView) view.findViewById(R.id.contentView);
+            view= LayoutInflater.from(mContext).inflate(R.layout.page_layout,null);
         }
-        assert textReaderView != null;
+        textReaderView= (TextReaderView) view.findViewById(R.id.contentView);
         textReaderView.setPosition(position);
         textReaderView.setmContentController(contentController);
         container.addView(view);

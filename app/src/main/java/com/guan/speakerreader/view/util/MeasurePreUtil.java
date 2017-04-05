@@ -59,7 +59,6 @@ public class MeasurePreUtil {
         }
         return original.substring(original.length() - wordCount);
     }
-
     //对一段文字进行排版测量，记录每行的文字数
     //'对于一段当中只有一个回车键此处还要完善判断
     public ArrayList<Integer> measureParagraph(String paragraph) {

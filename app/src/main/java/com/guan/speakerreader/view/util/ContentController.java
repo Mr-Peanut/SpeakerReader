@@ -18,17 +18,49 @@ public class ContentController {
     private PagesArrangeUtil pagesArrangeUtil;
     private int marked=0;
 
-    public ContentController(String filePath,Paint paint,float showWidth,float showHeight) throws Exception {
+    public Paint getmPaint() {
+        return mPaint;
+    }
+
+    public void setmPaint(Paint mPaint) {
+        this.mPaint = mPaint;
+    }
+
+    public float getShowHeight() {
+        return showHeight;
+    }
+
+    public void setShowHeight(float showHeight) {
+        this.showHeight = showHeight;
+    }
+
+    public float getShowWidth() {
+        return showWidth;
+    }
+
+    public void setShowWidth(float showWidth) {
+        this.showWidth = showWidth;
+    }
+
+    private Paint mPaint;
+    private float showHeight;
+    private float showWidth;
+    public ContentController(String filePath){
+        this.filePath=filePath;
         pageContent = new SparseArray<>();
         pageWordsCount=new SparseIntArray();
-        this.filePath = filePath;
-        measurePreUtil=new MeasurePreUtil(paint,showHeight,showWidth);
-        pagesArrangeUtil=new PagesArrangeUtil(filePath,paint,showWidth,showHeight);
+    }
+    public void initUtils(){
+        measurePreUtil=new MeasurePreUtil(mPaint,showHeight,showWidth);
+        pagesArrangeUtil=new PagesArrangeUtil(filePath,mPaint,showWidth,showHeight);
     }
 
     public String getContent(int position) {
-        if (pageContent.indexOfKey(position) >= 0)
+        if (pageContent.indexOfKey(position) >= 0){
+            System.err.println("getContetnfrome list");
             return pageContent.get(position);
+        }
+
         else {
             try {
                 //marked 的位置，当position为0时，marked=0，当position为其他数时默认为进度条拖动的位置
