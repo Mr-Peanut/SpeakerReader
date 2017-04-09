@@ -13,7 +13,7 @@ public class TxtReader {
     /*
      * ��δ����ǽ�ȡ��ָ��λ��marked��limit���ȵ��ַ������˴���Щ���⣬�ַ�������󳤶��Ǹ�int�͵ģ����������Ϊint,������������Ǹ�long�ͣ������Ľ�
      */
-    public static String readerFromText(String filePath, long marked, int limit) throws Exception {
+    public static String readerFromText(String filePath, int marked, int limit) throws Exception {
         if (marked < 0)
             return null;
         int buffLength = 2 * 1024;
@@ -36,9 +36,15 @@ public class TxtReader {
         }
         String result = stringBuffer.toString();
         bufferedReader.close();
+        inputStream.close();
         return result;
     }
-
+    public static String readerFromTextPre(String filePath, int marked, int limit) throws Exception {
+        if (marked < 0)
+            return readerFromText(filePath,0,marked+limit);
+       else
+           return  readerFromText(filePath,marked,limit);
+    }
     public static String getCodeType(File file) throws IOException {
         BufferedInputStream bin = new BufferedInputStream(new FileInputStream(file));
         int p = (bin.read()) << 8 + bin.read();

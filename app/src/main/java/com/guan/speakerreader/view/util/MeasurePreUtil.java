@@ -76,7 +76,7 @@ public class MeasurePreUtil {
         int wordCount = 0;
         float wordSpace;
         char[] buffer = new char[1];
-        StringBuffer stringBuffer = new StringBuffer();
+//        StringBuffer stringBuffer = new StringBuffer();
         while (wordCount < paragraph.length()) {
             while (totalWidth < showWidth && wordCount < paragraph.length()) {
                 buffer[0] = paragraph.charAt(wordCount);
@@ -85,14 +85,14 @@ public class MeasurePreUtil {
                     break;
                 wordCount++;
                 lineWordCount++;
-                stringBuffer.append(buffer);
+//                stringBuffer.append(buffer);
                 totalWidth += wordSpace;
             }
             lineRecord.add(lineWordCount);
-            Log.e(stringBuffer.toString(), String.valueOf(lineWordCount) + " buffer " + String.valueOf(stringBuffer.length()));
+//            Log.e(stringBuffer.toString(), String.valueOf(lineWordCount) + " buffer " + String.valueOf(stringBuffer.length()));
             totalWidth = 0;
             lineWordCount = 0;
-            stringBuffer.delete(0, stringBuffer.length());
+//            stringBuffer.delete(0, stringBuffer.length());
         }
         return lineRecord;
     }

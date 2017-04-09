@@ -8,6 +8,7 @@ import android.graphics.Paint;
 import android.support.annotation.Nullable;
 import android.text.TextPaint;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 
 import com.guan.speakerreader.view.util.ContentController;
@@ -29,7 +30,7 @@ public class TextReaderView extends View {
         super(context, attrs);
         mContext = context;
         mPaint = new TextPaint();
-        mPaint.setTextSize(20);
+        mPaint.setTextSize(35);
         mPaint.setColor(Color.BLACK);
         drawFinishedIntent = new Intent("DRAW_FINISHED");
         stringBuffer = new StringBuffer();
@@ -53,7 +54,7 @@ public class TextReaderView extends View {
 
     @Override
     protected void onDraw(Canvas canvas) {
-        System.err.println("第"+position+"页");
+        System.err.println("ondraw第"+position+"页");
         if( mContentController.getmPaint()==null){
             mContentController.setmPaint(new Paint(mPaint));
             mContentController.setShowHeight(getMeasuredHeight() - getPaddingTop() - getPaddingBottom());
@@ -61,6 +62,9 @@ public class TextReaderView extends View {
             mContentController.initUtils();
         }
       mContent=mContentController.getContent(position);
+        if(position==0){
+            mContentController.notifyPageChanged(position);
+        }
         if (mContent != null) {
             setContent(mContent, canvas);
 //            System.err.println("第" + position + "页showCount：" + showCount);
@@ -133,7 +137,9 @@ public class TextReaderView extends View {
     @Override
     protected void onDetachedFromWindow() {
         mContent = null;
+        position=0;
         super.onDetachedFromWindow();
+        Log.e("detachedfromwindow","detached");
     }
 
     public void setmContentController(ContentController mContentController) {

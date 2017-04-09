@@ -13,11 +13,8 @@ import android.view.View;
 
 import com.guan.speakerreader.R;
 import com.guan.speakerreader.view.adapter.ReaderPagerAdapter;
-import com.guan.speakerreader.view.adapter.ReaderPagerAdapter2;
 import com.guan.speakerreader.view.util.TxtReader;
 
-import java.util.ArrayList;
-import java.util.List;
 
 public class ReaderActivty extends AppCompatActivity {
     private ViewPager contentPager;
@@ -65,7 +62,7 @@ public class ReaderActivty extends AppCompatActivity {
     }
 
     private void initAdapter() {
-      readerPagerAdapter=new ReaderPagerAdapter(this,textPath);
+      readerPagerAdapter=new ReaderPagerAdapter(this,textPath,totalWords);
         contentPager.setAdapter(readerPagerAdapter);
         contentPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
@@ -75,7 +72,11 @@ public class ReaderActivty extends AppCompatActivity {
 
             @Override
             public void onPageSelected(int position) {
-                if(readerPagerAdapter!=null)
+                System.err.println("selected"+position);
+                //初始化时第一页不执行
+                //当最后一页还有字数的话设置总页面+1
+                //当最前页还有字数的话设置第0页为第一页
+                //但是要注意如果position发生了改变之前的位置信息也要改变
               readerPagerAdapter.getContentController().notifyPageChanged(position);
             }
 
@@ -110,7 +111,7 @@ public class ReaderActivty extends AppCompatActivity {
     class ShowFinishedReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-
+//          readerPagerAdapter.notifyDataSetChanged();
         }
     }
 }
