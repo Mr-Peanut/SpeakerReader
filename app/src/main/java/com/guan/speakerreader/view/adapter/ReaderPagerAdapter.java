@@ -18,11 +18,17 @@ import java.util.ArrayList;
  * Created by guans on 2017/4/4.
  */
 
-public class ReaderPagerAdapter extends PagerAdapter {
+public class ReaderPagerAdapter extends PagerAdapter implements View.OnClickListener{
     private ArrayList<WeakReference<View>> viewList;
     private ContentController contentController;
     private Context mContext;
     private String filePath;
+
+    public void setmInnerViewOnClickedListener(InnerViewOnClickedListener mInnerViewOnClickedListener) {
+        this.mInnerViewOnClickedListener = mInnerViewOnClickedListener;
+    }
+
+    private InnerViewOnClickedListener mInnerViewOnClickedListener;
     public ContentController getContentController() {
         return contentController;
     }
@@ -53,6 +59,7 @@ public class ReaderPagerAdapter extends PagerAdapter {
         textReaderView.setPosition(position);
         textReaderView.setmContentController(contentController);
         container.addView(view);
+        view.setOnClickListener(this);
         textReaderView.invalidate();
         return view;
     }
@@ -66,6 +73,7 @@ public class ReaderPagerAdapter extends PagerAdapter {
     public void destroyItem(ViewGroup container, int position, Object object) {
         View view= (View) object;
         container.removeView(view);
+        view.setOnClickListener(null);
         viewList.add(new WeakReference<>(view));
     }
 
@@ -83,5 +91,13 @@ public class ReaderPagerAdapter extends PagerAdapter {
     }
     public void insertPage(int position){
 
+    }
+
+    @Override
+    public void onClick(View v) {
+        mInnerViewOnClickedListener.onClicked();
+    }
+    public interface InnerViewOnClickedListener{
+        void onClicked();
     }
 }

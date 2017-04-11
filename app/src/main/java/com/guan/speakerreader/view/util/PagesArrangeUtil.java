@@ -27,6 +27,30 @@ public class PagesArrangeUtil {
         this.showHeight = showHeight;
     }
 
+    public Paint getmPaint() {
+        return mPaint;
+    }
+
+    public void setmPaint(Paint mPaint) {
+        this.mPaint = mPaint;
+    }
+
+    public float getShowWidth() {
+        return showWidth;
+    }
+
+    public void setShowWidth(float showWidth) {
+        this.showWidth = showWidth;
+    }
+
+    public float getShowHeight() {
+        return showHeight;
+    }
+
+    public void setShowHeight(float showHeight) {
+        this.showHeight = showHeight;
+    }
+
     public void setRun(boolean start) {
         this.run = start;
     }

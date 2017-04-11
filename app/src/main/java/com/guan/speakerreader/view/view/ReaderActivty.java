@@ -20,7 +20,7 @@ import com.guan.speakerreader.view.adapter.ReaderPagerAdapter;
 import com.guan.speakerreader.view.util.TxtReader;
 
 
-public class ReaderActivty extends AppCompatActivity {
+public class ReaderActivty extends AppCompatActivity implements ReaderPagerAdapter.InnerViewOnClickedListener {
     private ViewPager contentPager;
     private String textPath;
     private ShowFinishedReceiver showFinishedReceiver;
@@ -140,6 +140,7 @@ public class ReaderActivty extends AppCompatActivity {
 
     private void initAdapter() {
       readerPagerAdapter=new ReaderPagerAdapter(this,textPath,totalWords);
+        readerPagerAdapter.setmInnerViewOnClickedListener(this);
         contentPager.setAdapter(readerPagerAdapter);
         contentPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
@@ -173,12 +174,7 @@ public class ReaderActivty extends AppCompatActivity {
         findViewById(R.id.dummy_button).setOnTouchListener(mDelayHideTouchListener);
         mControlsView = findViewById(R.id.fullscreen_content_controls);
         contentPager = (ViewPager) findViewById(R.id.contentPager);
-        contentPager.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                toggle();
-            }
-        });
+
     }
 
     private void initBroadCast() {
@@ -242,6 +238,12 @@ public class ReaderActivty extends AppCompatActivity {
     private void delayedHide(int delayMillis) {
         mHideHandler.removeCallbacks(mHideRunnable);
         mHideHandler.postDelayed(mHideRunnable, delayMillis);
+    }
+
+    @Override
+    public void onClicked() {
+        toggle();
+
     }
 
     class ShowFinishedReceiver extends BroadcastReceiver {

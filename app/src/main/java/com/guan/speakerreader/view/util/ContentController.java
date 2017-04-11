@@ -73,8 +73,21 @@ public class ContentController {
         pageEnd=new SparseIntArray();
     }
     public void initUtils(){
-        measurePreUtil=new MeasurePreUtil(mPaint,showHeight,showWidth);
-        pagesArrangeUtil=new PagesArrangeUtil(filePath,mPaint,showWidth,showHeight);
+        if(measurePreUtil==null){
+            measurePreUtil=new MeasurePreUtil(mPaint,showHeight,showWidth);
+        } else {
+            measurePreUtil.setShowHeight(showHeight);
+            measurePreUtil.setShowWidth(showWidth);
+        }
+        if(pagesArrangeUtil==null){
+            pagesArrangeUtil=new PagesArrangeUtil(filePath,mPaint,showWidth,showHeight);
+        }else {
+            pagesArrangeUtil.setShowHeight(showHeight);
+            pagesArrangeUtil.setShowWidth(showWidth);
+        }
+        pageContent.clear();
+        pageStart.clear();
+        pageEnd.clear();
     }
 //交给view调用
     public String getContent(int position) {
@@ -200,5 +213,13 @@ public class ContentController {
     public void setContentFromPage(int pageNumberOnShow,int marked){
         setMarked(marked);
         notifyPageChanged(pageNumberOnShow);
+    }
+    public void reMeasure(Paint newPaint){
+        mPaint=new Paint(newPaint);
+        measurePreUtil.setmPaint(mPaint);
+        pagesArrangeUtil.setmPaint(mPaint);
+        pageContent.clear();
+        pageStart.clear();
+        pageEnd.clear();
     }
 }

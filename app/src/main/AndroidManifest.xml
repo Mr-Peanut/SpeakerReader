@@ -14,11 +14,12 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
          
-        <activity android:name=".view.view.FileActivity" />
+        <activity android:name=".view.view.FileActivity"
+            android:theme="@style/AppTheme.NoActionBar"/>
         <activity
             android:name=".view.view.WelcomeActivity"
             android:label="@string/title_activity_welcome"
-            android:theme="@style/AppTheme.NoActionBar">
+           >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
