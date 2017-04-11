@@ -1,7 +1,6 @@
 package com.guan.speakerreader.view.util;
 
 import android.graphics.Paint;
-import android.provider.Settings;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 
@@ -24,6 +23,10 @@ public class ContentController {
     private int marked=0;
     private int pageCount=1;
     private int totalWords;
+    private Paint mPaint;
+    private float showHeight;
+    private float showWidth;
+    private ReaderPagerAdapter mAdapter;
 
     public int getPageCount() {
         return pageCount;
@@ -60,10 +63,7 @@ public class ContentController {
         this.showWidth = showWidth;
     }
 
-    private Paint mPaint;
-    private float showHeight;
-    private float showWidth;
-    private ReaderPagerAdapter mAdapter;
+
     public ContentController(String filePath,int totalWords,ReaderPagerAdapter adapter){
         this.filePath=filePath;
         this.totalWords=totalWords;
@@ -107,48 +107,64 @@ public class ContentController {
         }
         return null;
     }
-    private void getContentNextShow(int position){
+    private void getContentNextShow(int position) {
 //        System.err.println("getNextContent from list： "+(position+1)+"页:"+pageContent.get(position+1));
-        if(pageContent.indexOfKey(position+1)<0)
-            //对content start和end进行赋值修改
-            try {
-                String content=TxtReader.readerFromText(filePath,onShowEnd+1,3000);
-                content=measureContent(content);
-//                System.err.println("getNextContent measure： "+(position+1)+"页:"+content);
-                //对content start和end进行赋值修改
-                pageContent.put(position+1,content);
-                pageStart.put(position+1,onShowEnd+1);
-                pageEnd.put(position+1,onShowEnd+content.length());
-                //当取完后一页还有字，页码加1
-                if(onShowEnd+content.length()<totalWords){
-                    pageCount++;
-                    mAdapter.notifyDataSetChanged();
+        if (pageContent.indexOfKey(position + 1) < 0) {
+            if (pageStart.indexOfKey(position + 1) >= 0 && pageEnd.indexOfKey(position + 1) >= 0) {
+                try {
+                    pageContent.put(position + 1, TxtReader.readerFromText(filePath, pageStart.get(position + 1), pageEnd.get(position + 1) - pageStart.get(position + 1)+1));
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
+            } else {
 
-                //这边添加逻辑或者判断，当页面到最后一页时还有内容就继续添加页数
-            } catch (Exception e) {
-                e.printStackTrace();
+                //对content start和end进行赋值修改
+                try {
+                    String content = TxtReader.readerFromText(filePath, onShowEnd + 1, 3000);
+                    content = measureContent(content);
+//                System.err.println("getNextContent measure： "+(position+1)+"页:"+content);
+                    //对content start和end进行赋值修改
+                    pageContent.put(position + 1, content);
+                    pageStart.put(position + 1, onShowEnd + 1);
+                    pageEnd.put(position + 1, onShowEnd + content.length());
+                    //当取完后一页还有字，页码加1
+                    if (onShowEnd + content.length() < totalWords) {
+                        pageCount++;
+                        mAdapter.notifyDataSetChanged();
+                    }
+                    //这边添加逻辑或者判断，当页面到最后一页时还有内容就继续添加页数
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
+            pageContent.delete(position + 2);
+        }
     }
     private void getContentPreShow(int position){
         if(pageContent.indexOfKey(position-1)<0&&position>=1){
             //这一段也有可以优化当已经测量过直接取用测量的
-            try {
-                //此处出错，如果字数小于3000字会返回null
-                String content=TxtReader.readerFromTextPre(filePath,onShowStart-1-3000,3000);
-                System.err.println("getNePreContent measure： "+(position+1)+"页:"+content);
-                //这一步可以进一步优化，如果pageWordCount里面有数据则直接获取之前测量字数进行取用
-                content=measurePreContent(content);
-                pageContent.put(position-1,content);
-                pageStart.put(position-1,onShowStart-content.length());
-                pageEnd.put(position-1,onShowStart-1);
-                if(position-1==0&&onShowStart-content.length()>0){
-                    //前面还有字，要做调整，第0页变成第1页，相关的三个记录的list要重新初始化,而且要修改pagecount
-
-
+            if(pageStart.indexOfKey(position-1)>=0&&pageEnd.indexOfKey(position-1)>=0) {
+                try {
+                    pageContent.put(position-1,TxtReader.readerFromText(filePath,pageStart.get(position-1),pageEnd.get(position-1)-pageStart.get(position-1)+1));
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
-            } catch (Exception e) {
-                e.printStackTrace();
+            }else {
+                try {
+                    //此处出错，如果字数小于3000字会返回null
+                    String content=TxtReader.readerFromTextPre(filePath,onShowStart-3000,3000);
+//                System.err.println("getNePreContent measure： "+(position-1)+"页:"+content);
+                    //这一步可以进一步优化，如果pageWordCount里面有数据则直接获取之前测量字数进行取用
+                    content=measurePreContent(content);
+                    pageContent.put(position-1,content);
+                    pageStart.put(position-1,onShowStart-content.length());
+                    pageEnd.put(position-1,onShowStart-1);
+                    if(position-1==0&&onShowStart-content.length()>0){
+                        //前面还有字，要做调整，第0页变成第1页，相关的三个记录的list要重新初始化,而且要修改pagecount
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         }
         if(position>=2)

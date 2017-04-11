@@ -86,11 +86,12 @@ public class TextReaderView extends View {
         int viewHeight = getMeasuredHeight() - getPaddingTop() - getPaddingBottom();
         int viewWidth = getMeasuredWidth() - Math.max(getPaddingLeft(), getPaddingStart()) - Math.max(getPaddingEnd(), getPaddingRight());
         float lineStartX = Math.max(getPaddingStart(), getPaddingLeft());
+        float wordWith;
 //        //读一行
         while (totalRowHeight + lineHeight <= viewHeight && wordCount <= content.length() - 1) {
             while (totalLineWidth < viewWidth && wordCount <= content.length() - 1) {
                 buffer[0] = content.charAt(wordCount);
-                float wordWith = paint.measureText(buffer, 0, 1);
+                 wordWith = paint.measureText(buffer, 0, 1);
                 if (totalLineWidth + wordWith > viewWidth) {
                     if (buffer[0] == '\n') {
                         wordCount++;
