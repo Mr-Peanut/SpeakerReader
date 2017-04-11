@@ -78,6 +78,7 @@ public class ReaderActivty extends AppCompatActivity {
                 //当最前页还有字数的话设置第0页为第一页
                 //但是要注意如果position发生了改变之前的位置信息也要改变
               readerPagerAdapter.getContentController().notifyPageChanged(position);
+
             }
 
             @Override
