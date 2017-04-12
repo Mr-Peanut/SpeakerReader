@@ -28,12 +28,19 @@ public class ContentController {
     private float showWidth;
     private ReaderPagerAdapter mAdapter;
 
+    public int getCurrentPageWords() {
+        return currentPageWords;
+    }
+
+    private int currentPageWords;
+
     public int getPageCount() {
         return pageCount;
     }
 
     public void setPageCount(int pageCount) {
         this.pageCount = pageCount;
+        mAdapter.notifyDataSetChanged();
     }
     /*
     还要考虑到往前到第0页有字和到最后一页还有字要动态修改页面
@@ -108,6 +115,7 @@ public class ContentController {
                 //逻辑可能出错了
                 pageStart.put(position,onShowStart);
                 pageEnd.put(position,onShowEnd);
+                currentPageWords=onShowEnd-onShowStart>currentPageWords?onShowEnd-onShowStart:currentPageWords;
                 if(onShowEnd<totalWords){
                     pageCount++;
                     mAdapter.notifyDataSetChanged();
@@ -130,7 +138,6 @@ public class ContentController {
                     e.printStackTrace();
                 }
             } else {
-
                 //对content start和end进行赋值修改
                 try {
                     String content = TxtReader.readerFromText(filePath, onShowEnd + 1, 3000);
@@ -199,11 +206,18 @@ public class ContentController {
             setMarked(0);
         }//此处有大问题的，没有同步更新marked和onShow start的值因此每次取用字数都是从0开始取的
         // 的位置，思路新建一个表，从表中取值
-        onShowStart=pageStart.get(position);
-        onShowEnd=pageEnd.get(position);
-        setPageNumber(position);
-        getContentNextShow(position);
+        //从前往后选这个方法可以，但是如果从当中选值的话，这样做不行
+        if(pageStart.indexOfKey(position)>0&&pageEnd.indexOfKey(position)>0){
+            onShowStart=pageStart.get(position);
+            onShowEnd=pageEnd.get(position);
+            setPageNumber(position);
+            getContentNextShow(position);
+        } else{
+            getContent(position);
+        }
         getContentPreShow(position);
+        mAdapter.updateSeekBar(onShowStart);
+        //把更新后的位置通知给seekbar可以通过handler实现或者广播，或者一个接口
     }
 
     public void setMarked(int marked) {

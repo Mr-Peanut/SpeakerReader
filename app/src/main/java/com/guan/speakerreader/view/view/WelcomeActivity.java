@@ -130,7 +130,6 @@ public class WelcomeActivity extends AppCompatActivity implements ReadRecordAdap
             }
         });
         popupMenu.show();
-
         return true;
     }
 
@@ -138,7 +137,7 @@ public class WelcomeActivity extends AppCompatActivity implements ReadRecordAdap
         Cursor cursor = readRecordAdapter.getRecordCursor();
         cursor.moveToPosition(cursor.getCount() - position - 1);
         String filePath = cursor.getString(cursor.getColumnIndex("filepath"));
-        Intent intent = new Intent(WelcomeActivity.this, ReaderActivty.class);
+        Intent intent = new Intent(WelcomeActivity.this, ReaderActivity.class);
         intent.putExtra("FILEPATH", filePath);
         startActivity(intent);
     }

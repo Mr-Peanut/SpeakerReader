@@ -24,6 +24,12 @@ public class ReaderPagerAdapter extends PagerAdapter implements View.OnClickList
     private Context mContext;
     private String filePath;
 
+    public void setmUpdateSeekBarController(UpdateSeekBarController mUpdateSeekBarController) {
+        this.mUpdateSeekBarController = mUpdateSeekBarController;
+    }
+
+    private UpdateSeekBarController mUpdateSeekBarController;
+
     public void setmInnerViewOnClickedListener(InnerViewOnClickedListener mInnerViewOnClickedListener) {
         this.mInnerViewOnClickedListener = mInnerViewOnClickedListener;
     }
@@ -97,7 +103,13 @@ public class ReaderPagerAdapter extends PagerAdapter implements View.OnClickList
     public void onClick(View v) {
         mInnerViewOnClickedListener.onClicked();
     }
+    public void updateSeekBar(int progress){
+        mUpdateSeekBarController.upDate(progress);
+    }
     public interface InnerViewOnClickedListener{
         void onClicked();
+    }
+    public interface UpdateSeekBarController {
+      void upDate(int progress) ;
     }
 }

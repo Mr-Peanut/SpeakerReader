@@ -12,33 +12,35 @@ import android.os.Handler;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.view.DragEvent;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.ProgressBar;
+import android.widget.SeekBar;
 
 import com.guan.speakerreader.R;
 import com.guan.speakerreader.view.adapter.ReaderPagerAdapter;
 import com.guan.speakerreader.view.util.TxtReader;
 
 
-public class ReaderActivty extends AppCompatActivity implements ReaderPagerAdapter.InnerViewOnClickedListener {
+public class ReaderActivity extends AppCompatActivity implements ReaderPagerAdapter.InnerViewOnClickedListener,ReaderPagerAdapter.UpdateSeekBarController {
     private ViewPager contentPager;
     private String textPath;
     private ShowFinishedReceiver showFinishedReceiver;
     private int totalWords;
     private ProgressDialog getTotalWordsDialog;
     private ReaderPagerAdapter readerPagerAdapter;
+    private SeekBar readerSeekBar;
     /**
      * Whether or not the system UI should be auto-hidden after
      * {@link #AUTO_HIDE_DELAY_MILLIS} milliseconds.
      */
     private static final boolean AUTO_HIDE = true;
-
     /**
      * If {@link #AUTO_HIDE} is set, the number of milliseconds to wait after
      * user interaction before hiding the system UI.
      */
     private static final int AUTO_HIDE_DELAY_MILLIS = 3000;
-
     /**
      * Some older devices needs a small delay between UI widget updates
      * and a change of the status and navigation bar.
@@ -50,7 +52,6 @@ public class ReaderActivty extends AppCompatActivity implements ReaderPagerAdapt
         @Override
         public void run() {
             // Delayed removal of status and navigation bar
-
             // Note that some of these constants are new as of API 16 (Jelly Bean)
             // and API 19 (KitKat). It is safe to use them, as they are inlined
             // at compile-time and do nothing on earlier devices.
@@ -100,9 +101,7 @@ public class ReaderActivty extends AppCompatActivity implements ReaderPagerAdapt
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_reader);
         mVisible = true;
-
         // Set up the user interaction to manually show or hide the system UI.
-
         // Upon interacting with UI controls, delay any scheduled hide()
         // operations to prevent the jarring behavior of controls going away
         // while interacting with the UI.
@@ -129,7 +128,7 @@ public class ReaderActivty extends AppCompatActivity implements ReaderPagerAdapt
 
                 @Override
                 protected void onPreExecute() {
-                    getTotalWordsDialog = new ProgressDialog(ReaderActivty.this);
+                    getTotalWordsDialog = new ProgressDialog(ReaderActivity.this);
                     getTotalWordsDialog.setMessage("正在读取文件，请稍后");
                     getTotalWordsDialog.show();
                     super.onPreExecute();
@@ -139,7 +138,32 @@ public class ReaderActivty extends AppCompatActivity implements ReaderPagerAdapt
     }
 
     private void initAdapter() {
+        readerSeekBar.setMax(totalWords);
+
       readerPagerAdapter=new ReaderPagerAdapter(this,textPath,totalWords);
+        readerSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if(fromUser){
+                    int pageCount= readerPagerAdapter.getContentController().getCurrentPageWords();
+                    int pageNumber=progress/pageCount;
+                    readerPagerAdapter.getContentController().setPageCount(pageNumber);
+                    readerPagerAdapter.getContentController().setContentFromPage(pageNumber,progress);
+                    contentPager.setCurrentItem(pageNumber);
+                }
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
+        readerPagerAdapter.setmUpdateSeekBarController(this);
         readerPagerAdapter.setmInnerViewOnClickedListener(this);
         contentPager.setAdapter(readerPagerAdapter);
         contentPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
@@ -156,6 +180,7 @@ public class ReaderActivty extends AppCompatActivity implements ReaderPagerAdapt
                 //当最前页还有字数的话设置第0页为第一页
                 //但是要注意如果position发生了改变之前的位置信息也要改变
               readerPagerAdapter.getContentController().notifyPageChanged(position);
+                //添加进度条控制
 
             }
 
@@ -171,10 +196,10 @@ public class ReaderActivty extends AppCompatActivity implements ReaderPagerAdapt
 
 
     private void initView() {
-        findViewById(R.id.dummy_button).setOnTouchListener(mDelayHideTouchListener);
+//        findViewById(R.id.dummy_button).setOnTouchListener(mDelayHideTouchListener);
         mControlsView = findViewById(R.id.fullscreen_content_controls);
         contentPager = (ViewPager) findViewById(R.id.contentPager);
-
+        readerSeekBar= (SeekBar) findViewById(R.id.readerSeekBar);
     }
 
     private void initBroadCast() {
@@ -243,7 +268,11 @@ public class ReaderActivty extends AppCompatActivity implements ReaderPagerAdapt
     @Override
     public void onClicked() {
         toggle();
+    }
 
+    @Override
+    public void upDate(int progress) {
+        readerSeekBar.setProgress(progress);
     }
 
     class ShowFinishedReceiver extends BroadcastReceiver {
