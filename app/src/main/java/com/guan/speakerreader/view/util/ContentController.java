@@ -1,6 +1,7 @@
 package com.guan.speakerreader.view.util;
 
 import android.graphics.Paint;
+import android.provider.Settings;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 
@@ -101,7 +102,6 @@ public class ContentController {
     public String getContent(int position) {
         if (pageContent.indexOfKey(position) >= 0){
             System.err.println("getContetnfrome list");
-            marked=pageStart.get(position);
             return pageContent.get(position);
         }
         else {
@@ -123,6 +123,8 @@ public class ContentController {
                     mAdapter.notifyDataSetChanged();
                     getContentNextShow(position);
                 }
+                if(onShowStart>0)
+                getContentPreShow(position);
                 return content;
             } catch (Exception e) {
                 e.printStackTrace();
@@ -167,14 +169,20 @@ public class ContentController {
             //这一段也有可以优化当已经测量过直接取用测量的
             if(pageStart.indexOfKey(position-1)>=0&&pageEnd.indexOfKey(position-1)>=0) {
                 try {
+                    System.err.println("pre get from list ");
                     pageContent.put(position-1,TxtReader.readerFromText(filePath,pageStart.get(position-1),pageEnd.get(position-1)-pageStart.get(position-1)+1));
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             }else {
                 try {
-                    //此处出错，如果字数小于3000字会返回null
-                    String content=TxtReader.readerFromTextPre(filePath,onShowStart-3000,3000);
+                    String content;
+                    if(pageStart.indexOfKey(position)>=0){
+                        content =TxtReader.readerFromTextPre(filePath,pageStart.get(position)-3000,3000);
+                    }else {
+                        content=TxtReader.readerFromTextPre(filePath,onShowStart-3000,3000);
+                    }
+
                     System.err.println(onShowStart);
 //                System.err.println("getNePreContent measure： "+(position-1)+"页:"+content);
                     //这一步可以进一步优化，如果pageWordCount里面有数据则直接获取之前测量字数进行取用
@@ -220,6 +228,8 @@ public class ContentController {
         }
         getContentPreShow(position);
         mAdapter.updateSeekBar(onShowStart);
+        marked=onShowStart;
+        System.err.println("selected: "+onShowStart);
         //把更新后的位置通知给seekbar可以通过handler实现或者广播，或者一个接口
     }
 

@@ -136,10 +136,8 @@ public class ReaderActivity extends AppCompatActivity implements ReaderPagerAdap
             }.execute();
         }
     }
-
     private void initAdapter() {
         readerSeekBar.setMax(totalWords);
-
       readerPagerAdapter=new ReaderPagerAdapter(this,textPath,totalWords);
         readerSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
@@ -147,7 +145,7 @@ public class ReaderActivity extends AppCompatActivity implements ReaderPagerAdap
                 if(fromUser){
                     int pageCount= readerPagerAdapter.getContentController().getCurrentPageWords();
                     int pageNumber=progress/pageCount;
-                    readerPagerAdapter.getContentController().setPageCount(pageNumber);
+                    readerPagerAdapter.getContentController().setPageCount(pageNumber+1);
                     readerPagerAdapter.getContentController().setContentFromPage(pageNumber,progress);
                     contentPager.setCurrentItem(pageNumber);
                 }
