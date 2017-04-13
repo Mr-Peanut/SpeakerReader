@@ -92,6 +92,7 @@ public class ContentController {
             pagesArrangeUtil.setShowHeight(showHeight);
             pagesArrangeUtil.setShowWidth(showWidth);
         }
+        //当尺寸没有具体变化时不要清理
         pageContent.clear();
         pageStart.clear();
         pageEnd.clear();
@@ -100,6 +101,7 @@ public class ContentController {
     public String getContent(int position) {
         if (pageContent.indexOfKey(position) >= 0){
             System.err.println("getContetnfrome list");
+            marked=pageStart.get(position);
             return pageContent.get(position);
         }
         else {
@@ -173,6 +175,7 @@ public class ContentController {
                 try {
                     //此处出错，如果字数小于3000字会返回null
                     String content=TxtReader.readerFromTextPre(filePath,onShowStart-3000,3000);
+                    System.err.println(onShowStart);
 //                System.err.println("getNePreContent measure： "+(position-1)+"页:"+content);
                     //这一步可以进一步优化，如果pageWordCount里面有数据则直接获取之前测量字数进行取用
                     content=measurePreContent(content);

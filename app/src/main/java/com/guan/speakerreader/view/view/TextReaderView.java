@@ -57,11 +57,13 @@ public class TextReaderView extends View {
         System.err.println("ondraw第"+position+"页");
         if(mContentController.getmPaint()==null){
             mContentController.setmPaint(new Paint(mPaint));
+            System.err.println("初始化paint");
         }
         if( mContentController.getShowHeight()!=getMeasuredHeight() - getPaddingTop() - getPaddingBottom()){
             mContentController.setShowHeight(getMeasuredHeight() - getPaddingTop() - getPaddingBottom());
             mContentController.setShowWidth( getMeasuredWidth() - Math.max(getPaddingLeft(), getPaddingStart()) - Math.max(getPaddingEnd(), getPaddingRight()));
             mContentController.initUtils();
+            System.err.println("初始化长宽");
         }
       mContent=mContentController.getContent(position);
         if(position==0){
