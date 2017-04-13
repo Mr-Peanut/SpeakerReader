@@ -108,6 +108,7 @@ public class ContentController {
             try {
                 //marked 的位置，当position为0时，marked=0，当position为其他数时默认为进度条拖动的位置
                 String content=TxtReader.readerFromText(filePath, marked, 3000);
+                System.err.println("getContent from  marked"+marked);
 //                System.err.println("getContent marked"+marked);
                 onShowStart=marked;
                 content=measureContent(content);
@@ -118,6 +119,9 @@ public class ContentController {
                 pageStart.put(position,onShowStart);
                 pageEnd.put(position,onShowEnd);
                 currentPageWords=onShowEnd-onShowStart>currentPageWords?onShowEnd-onShowStart:currentPageWords;
+                if(onShowEnd>=totalWords){
+                    setPageCount(position+1);
+                }
                 if(onShowEnd<totalWords){
                     pageCount++;
                     mAdapter.notifyDataSetChanged();
@@ -137,6 +141,7 @@ public class ContentController {
         if (pageContent.indexOfKey(position + 1) < 0) {
             if (pageStart.indexOfKey(position + 1) >= 0 && pageEnd.indexOfKey(position + 1) >= 0) {
                 try {
+                    System.err.println("getNextContent from  list");
                     pageContent.put(position + 1, TxtReader.readerFromText(filePath, pageStart.get(position + 1), pageEnd.get(position + 1) - pageStart.get(position + 1)+1));
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -144,7 +149,12 @@ public class ContentController {
             } else {
                 //对content start和end进行赋值修改
                 try {
+                    System.err.println("getNextContent from  showEnd");
                     String content = TxtReader.readerFromText(filePath, onShowEnd + 1, 3000);
+                    if(content==null){
+                        setPageCount(position+1);
+                        return;
+                    }
                     content = measureContent(content);
 //                System.err.println("getNextContent measure： "+(position+1)+"页:"+content);
                     //对content start和end进行赋值修改
@@ -161,7 +171,10 @@ public class ContentController {
                     e.printStackTrace();
                 }
             }
-            pageContent.delete(position + 2);
+            if(position>=2)
+                pageContent.delete(position-2);
+
+
         }
     }
     private void getContentPreShow(int position){
@@ -179,6 +192,7 @@ public class ContentController {
                     String content;
                     if(pageStart.indexOfKey(position)>=0){
                         content =TxtReader.readerFromTextPre(filePath,pageStart.get(position)-3000,3000);
+                        System.err.println("pre get from measure "+(position-1));
                     }else {
                         content=TxtReader.readerFromTextPre(filePath,onShowStart-3000,3000);
                     }
@@ -189,6 +203,7 @@ public class ContentController {
                     content=measurePreContent(content);
                     pageContent.put(position-1,content);
                     pageStart.put(position-1,onShowStart-content.length());
+                    System.err.println("measurepre"+(onShowStart-content.length())+"  "+(position-1));
                     pageEnd.put(position-1,onShowStart-1);
                     if(position-1==0&&onShowStart-content.length()>0){
                         //前面还有字，要做调整，第0页变成第1页，相关的三个记录的list要重新初始化,而且要修改pagecount
@@ -198,8 +213,9 @@ public class ContentController {
                 }
             }
         }
-        if(position>=2)
-            pageContent.delete(position-2);
+        pageContent.delete(position + 2);
+        pageStart.delete(position+2);
+        pageEnd.delete(position+2);
     }
     private String measureContent(String content) {
         //通过功能类measure util进行测量计算
@@ -218,13 +234,16 @@ public class ContentController {
         }//此处有大问题的，没有同步更新marked和onShow start的值因此每次取用字数都是从0开始取的
         // 的位置，思路新建一个表，从表中取值
         //从前往后选这个方法可以，但是如果从当中选值的话，这样做不行
-        if(pageStart.indexOfKey(position)>0&&pageEnd.indexOfKey(position)>0){
+
+        if(pageStart.indexOfKey(position)>=0&&pageEnd.indexOfKey(position)>=0){
+            System.err.println("selected list has");
             onShowStart=pageStart.get(position);
             onShowEnd=pageEnd.get(position);
             setPageNumber(position);
             getContentNextShow(position);
         } else{
             getContent(position);
+            System.err.println("selected list hasnot"+position);
         }
         getContentPreShow(position);
         mAdapter.updateSeekBar(onShowStart);
