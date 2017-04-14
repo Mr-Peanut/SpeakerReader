@@ -57,22 +57,18 @@ public class ReadRecordAdapter extends RecyclerView.Adapter<ReadRecordAdapter.MH
             mDatabase = mHelper.getReadableDatabase();
         if (recordCursor == null)
             recordCursor = mDatabase.query(TABLE_NAME, null, null, null, null, null, "_id");
-//        System.err.println("getData"+recordCursor.getCount());
 //        recordCursor.registerContentObserver(new ContentObserver(new Handler(context.getMainLooper())) {
 //            @Override
 //            public void onChange(boolean selfChange) {
 //                super.onChange(selfChange);
-//                System.err.println("content before"+recordCursor.getCount());
 //            }
 //        });
         recordCursor.registerDataSetObserver(new DataSetObserver() {
             @Override
             public void onChanged() {
-                System.err.println("oberser before" + recordCursor.getCount());
                 recordCursor.close();
                 recordCursor = mDatabase.query(TABLE_NAME, null, null, null, null, null, "_id");
                 recordCursor.registerDataSetObserver(this);
-                System.err.println("oberser after" + recordCursor.getCount());
             }
         });
     }
@@ -134,7 +130,6 @@ public class ReadRecordAdapter extends RecyclerView.Adapter<ReadRecordAdapter.MH
 
     @Override
     public int getItemCount() {
-        System.err.println("getItemCount" + recordCursor.getCount());
         return recordCursor.getCount();
     }
 

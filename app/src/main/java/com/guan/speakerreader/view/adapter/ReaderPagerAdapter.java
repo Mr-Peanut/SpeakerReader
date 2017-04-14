@@ -54,11 +54,9 @@ public class ReaderPagerAdapter extends PagerAdapter implements View.OnClickList
         View view = null;
         if(viewList.size()>0){
             view=viewList.remove(0).get();
-            Log.e("getView","from viewList");
         }
         if(view==null){
             view= LayoutInflater.from(mContext).inflate(R.layout.page_layout,null);
-            Log.e("getView","from LayoutInflater");
         }
         textReaderView= (TextReaderView) view.findViewById(R.id.contentView);
         ((TextView)(view.findViewById(R.id.foot))).setText("第"+position+"页");
@@ -85,6 +83,7 @@ public class ReaderPagerAdapter extends PagerAdapter implements View.OnClickList
 
     @Override
     public int getCount() {
+        Log.e("getCount: ",String.valueOf(getTotalPage()));
         return getTotalPage();
     }
     private int getTotalPage() {

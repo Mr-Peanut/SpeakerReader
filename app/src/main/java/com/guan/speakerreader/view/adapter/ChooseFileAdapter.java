@@ -37,7 +37,6 @@ public class ChooseFileAdapter extends RecyclerView.Adapter<ChooseFileAdapter.Fi
         rootPaths = new ArrayList<String>();
         for (PathUtil.VolumeInfo volumeInfo : volumeInfoList) {
             rootPaths.add(volumeInfo.getVolumePath());
-            System.err.println("rootpath" + volumeInfo.getVolumePath());
         }
     }
 

@@ -20,7 +20,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:fitsSystemWindows="true">
-
         <LinearLayout
             android:id="@+id/fullscreen_content_controls"
             style="?metaButtonBarStyle"
@@ -56,9 +55,6 @@
                     android:layout_weight="1"
                     android:text="其他"/>
             </LinearLayout>
-
-
-
         </LinearLayout>
     </FrameLayout>
 

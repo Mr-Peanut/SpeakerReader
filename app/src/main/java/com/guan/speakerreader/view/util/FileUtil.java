@@ -50,7 +50,6 @@ public class FileUtil {
                         statFs = new StatFs(path);
                         if (statFs.getBlockCountLong() * statFs.getBlockSizeLong() != 0) {
                             filePaths.add(path);
-                            System.err.println("path1" + path);
                         }
                     }
                 }
@@ -73,7 +72,6 @@ public class FileUtil {
             String line;
             StatFs statFs;
             while ((line = bufferedReader.readLine()) != null) {
-                System.err.println("runningtimen" + line);
                 if (line.contains("storage")) {
                     String[] arr = line.split(" ");
                     String path = arr[1];

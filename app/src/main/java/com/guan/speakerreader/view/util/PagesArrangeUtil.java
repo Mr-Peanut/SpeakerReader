@@ -56,22 +56,15 @@ public class PagesArrangeUtil {
     }
 
     public BookArrangeInfo arrangePages() {
-        long currentTime = System.currentTimeMillis();
         File file = new File(filePath);
         long totalWords = TxtReader.getTotalWords(filePath);
-        System.err.println("总字数totalWords：" + totalWords);
-//        System.err.println("showwidth："+showWidth);
-//        System.err.println("showHeight："+showHeight);
-//        System.err.println("mpaint："+mPaint.getTextSize());
         char[] test = new char[]{'\n'};
-//        System.err.println("measure换行："+mPaint.measureText(test,0,1));
 
         FileInputStream inputStream = null;
         InputStreamReader reader = null;
         float totalRowHeight = 0;
         float totalLineWidth = 0;
         float lineHeight = mPaint.descent() - mPaint.ascent();
-//        System.err.println("lineHeight"+lineHeight);
         int wordCount = 0;
         int pageCount = 0;
         char[] buffer = new char[1];
@@ -93,7 +86,6 @@ public class PagesArrangeUtil {
                         wordCount++;
                         if (buffer[0] == '\n') {
                             wordSpace = 0;
-//                                     System.err.println("行内容： "+stringBuffer+"  回车了");
 //                                     stringBuffer.delete(0,stringBuffer.length());
                             break;
                         }
@@ -111,22 +103,18 @@ public class PagesArrangeUtil {
                         }
                         totalLineWidth += wordSpace;
                         if (totalLineWidth == showWidth) {
-//                                     System.err.println("行内容： "+stringBuffer+" 刚好一行");
 //                                     stringBuffer.delete(0,stringBuffer.length());
                         }
                         wordSpace = 0;
                     }
                     totalLineWidth = wordSpace;
                     totalRowHeight += lineHeight;
-//                         System.err.println("measure height"+totalRowHeight);
                 }
                 if (wordSpace != 0) {
                     recordList.add(wordCount - 1);
-//                         System.err.println("第"+pageCount+"页:字数"+(wordCount-1));
 
                 } else {
                     recordList.add(wordCount);
-//                         System.err.println("第"+pageCount+"页:字数"+wordCount);
                 }
                 pageCount++;
                 totalRowHeight = 0;
@@ -148,8 +136,6 @@ public class PagesArrangeUtil {
                     e.printStackTrace();
                 }
         }
-        System.err.println("总字数wordCount：" + wordCount);
-        System.err.println("共耗时:" + (System.currentTimeMillis() - currentTime));
         return new BookArrangeInfo(file.getName(), filePath, recordList, pageCount);
     }
 
@@ -157,7 +143,6 @@ public class PagesArrangeUtil {
         float totalRowHeight = 0;
         float totalLineWidth = 0;
         float lineHeight = mPaint.descent() - mPaint.ascent();
-//        System.err.println("lineHeight"+lineHeight);
         int wordCount = 0;
         char[] buffer = new char[1];
         StringBuffer stringBuffer = new StringBuffer();
@@ -183,8 +168,6 @@ public class PagesArrangeUtil {
                 }
                 totalLineWidth = 0;
                 totalRowHeight += lineHeight;
-                System.err.println("measure" + stringBuffer.toString());
-                System.err.println("measureTotalHeight: " + totalRowHeight + "measureTotalHeight: " + showHeight);
                 stringBuffer.delete(0, stringBuffer.length());
             }
             setRun(false);
@@ -214,8 +197,6 @@ public class PagesArrangeUtil {
                     break;
             }
             totalRowHeight = totalRowHeight + lineHeight;
-//            System.err.println("totalRowHeight" + totalRowHeight);
-//            System.err.println("onDraw:" + stringBuffer);
             totalLineWidth = 0;
         }
      return content.substring(0,wordCount);

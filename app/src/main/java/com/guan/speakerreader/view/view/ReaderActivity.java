@@ -12,6 +12,7 @@ import android.os.Handler;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.DragEvent;
 import android.view.MotionEvent;
 import android.view.View;
@@ -23,7 +24,7 @@ import com.guan.speakerreader.view.adapter.ReaderPagerAdapter;
 import com.guan.speakerreader.view.util.TxtReader;
 
 
-public class ReaderActivity extends AppCompatActivity implements ReaderPagerAdapter.InnerViewOnClickedListener,ReaderPagerAdapter.UpdateSeekBarController {
+public class ReaderActivity extends AppCompatActivity implements ReaderPagerAdapter.InnerViewOnClickedListener, ReaderPagerAdapter.UpdateSeekBarController {
     private ViewPager contentPager;
     private String textPath;
     private ShowFinishedReceiver showFinishedReceiver;
@@ -55,7 +56,7 @@ public class ReaderActivity extends AppCompatActivity implements ReaderPagerAdap
             // Note that some of these constants are new as of API 16 (Jelly Bean)
             // and API 19 (KitKat). It is safe to use them, as they are inlined
             // at compile-time and do nothing on earlier devices.
-           contentPager.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE
+            contentPager.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE
                     | View.SYSTEM_UI_FLAG_FULLSCREEN
                     | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
                     | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
@@ -96,6 +97,7 @@ public class ReaderActivity extends AppCompatActivity implements ReaderPagerAdap
             return false;
         }
     };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -125,7 +127,6 @@ public class ReaderActivity extends AppCompatActivity implements ReaderPagerAdap
                     initAdapter();
                     getTotalWordsDialog.dismiss();
                 }
-
                 @Override
                 protected void onPreExecute() {
                     getTotalWordsDialog = new ProgressDialog(ReaderActivity.this);
@@ -136,18 +137,25 @@ public class ReaderActivity extends AppCompatActivity implements ReaderPagerAdap
             }.execute();
         }
     }
+
     private void initAdapter() {
         readerSeekBar.setMax(totalWords);
-      readerPagerAdapter=new ReaderPagerAdapter(this,textPath,totalWords);
+        readerPagerAdapter = new ReaderPagerAdapter(this, textPath, totalWords);
         readerSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                if(fromUser){
-                    int pageCount= readerPagerAdapter.getContentController().getCurrentPageWords();
-                    int pageNumber=progress/pageCount;
+                if (fromUser) {
+                    int pageCount = readerPagerAdapter.getContentController().getCurrentPageWords();
+                    int pageNumber = progress / pageCount;
                     readerPagerAdapter.getContentController().setPageCount(pageNumber);
-                    readerPagerAdapter.getContentController().setContentFromPage(pageNumber,progress);
-                    contentPager.setCurrentItem(pageNumber);
+                    if(progress>=totalWords-pageCount){
+                        readerPagerAdapter.getContentController().setContentFromPage(pageNumber-1, totalWords-pageCount);
+                    }else {
+                        readerPagerAdapter.getContentController().setContentFromPage(pageNumber-1, progress);
+                    }
+
+                    contentPager.setCurrentItem(pageNumber-1);
+                    Log.e("seekbar selected: ", String.valueOf(pageNumber));
                 }
             }
 
@@ -172,12 +180,11 @@ public class ReaderActivity extends AppCompatActivity implements ReaderPagerAdap
 
             @Override
             public void onPageSelected(int position) {
-                System.err.println("selected"+position);
                 //初始化时第一页不执行
                 //当最后一页还有字数的话设置总页面+1
                 //当最前页还有字数的话设置第0页为第一页
                 //但是要注意如果position发生了改变之前的位置信息也要改变
-              readerPagerAdapter.getContentController().notifyPageChanged(position);
+                readerPagerAdapter.getContentController().notifyPageChanged(position);
                 //添加进度条控制
 
             }
@@ -197,7 +204,7 @@ public class ReaderActivity extends AppCompatActivity implements ReaderPagerAdap
 //        findViewById(R.id.dummy_button).setOnTouchListener(mDelayHideTouchListener);
         mControlsView = findViewById(R.id.fullscreen_content_controls);
         contentPager = (ViewPager) findViewById(R.id.contentPager);
-        readerSeekBar= (SeekBar) findViewById(R.id.readerSeekBar);
+        readerSeekBar = (SeekBar) findViewById(R.id.readerSeekBar);
     }
 
     private void initBroadCast() {
@@ -212,6 +219,7 @@ public class ReaderActivity extends AppCompatActivity implements ReaderPagerAdap
             unregisterReceiver(showFinishedReceiver);
         super.onDestroy();
     }
+
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
@@ -276,7 +284,6 @@ public class ReaderActivity extends AppCompatActivity implements ReaderPagerAdap
     class ShowFinishedReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-//          readerPagerAdapter.notifyDataSetChanged();
         }
     }
 }

@@ -80,7 +80,6 @@ public class WelcomeActivity extends AppCompatActivity implements ReadRecordAdap
 //            System.err.println("insert data"+i);
 //            database.insert(TABLE_NAME,null,values);
 //        }
-//        System.err.println("after insert"+database.query(TABLE_NAME,null,null,null,null,null,null,null).getCount());
 //    }
 
     /*

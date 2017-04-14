@@ -54,16 +54,13 @@ public class TextReaderView extends View {
 
     @Override
     protected void onDraw(Canvas canvas) {
-        System.err.println("ondraw第"+position+"页");
         if(mContentController.getmPaint()==null){
             mContentController.setmPaint(new Paint(mPaint));
-            System.err.println("初始化paint");
         }
         if( mContentController.getShowHeight()!=getMeasuredHeight() - getPaddingTop() - getPaddingBottom()){
             mContentController.setShowHeight(getMeasuredHeight() - getPaddingTop() - getPaddingBottom());
             mContentController.setShowWidth( getMeasuredWidth() - Math.max(getPaddingLeft(), getPaddingStart()) - Math.max(getPaddingEnd(), getPaddingRight()));
             mContentController.initUtils();
-            System.err.println("初始化长宽");
         }
       mContent=mContentController.getContent(position);
         if(position==0){
@@ -71,13 +68,11 @@ public class TextReaderView extends View {
         }
         if (mContent != null) {
             setContent(mContent, canvas);
-//            System.err.println("第" + position + "页showCount：" + showCount);
             drawFinishedIntent.putExtra("showCount", showCount);
             drawFinishedIntent.putExtra("position", position);
             mContext.sendBroadcast(drawFinishedIntent);
         }
         super.onDraw(canvas);
-        System.err.println("第"+position+"页");
     }
 
     private void setContent(final String content, Canvas canvas) {
@@ -109,9 +104,7 @@ public class TextReaderView extends View {
                     break;
             }
             totalRowHeight = totalRowHeight + lineHeight;
-//            System.err.println("totalRowHeight" + totalRowHeight);
             canvas.drawText(stringBuffer.toString(), lineStartX, totalRowHeight + getPaddingTop(), mPaint);
-//            System.err.println("onDraw:" + stringBuffer);
             stringBuffer.delete(0, stringBuffer.length());
             totalLineWidth = 0;
         }
@@ -144,7 +137,6 @@ public class TextReaderView extends View {
         mContent = null;
         position=0;
         super.onDetachedFromWindow();
-        Log.e("detachedfromwindow","detached");
     }
 
     public void setmContentController(ContentController mContentController) {
