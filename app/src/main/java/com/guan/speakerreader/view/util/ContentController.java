@@ -260,4 +260,10 @@ public class ContentController {
         pageStart.clear();
         pageEnd.clear();
     }
+    /*
+    动态调整页面：
+    1、当从0开始往后翻，只添加最后一页
+    2、当从当中位置往前翻的时候，set当前页面为倒数第一页（向前加交给control解决，总页数大于当前字数/最小页字数，当页数向前翻到底的时候即当前页开始字为0的时候
+    设置当前页为第0页（selected0？）
+     */
 }

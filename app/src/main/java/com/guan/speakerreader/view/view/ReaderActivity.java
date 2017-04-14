@@ -18,6 +18,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.SeekBar;
+import android.widget.TextView;
 
 import com.guan.speakerreader.R;
 import com.guan.speakerreader.view.adapter.ReaderPagerAdapter;
@@ -32,6 +33,7 @@ public class ReaderActivity extends AppCompatActivity implements ReaderPagerAdap
     private ProgressDialog getTotalWordsDialog;
     private ReaderPagerAdapter readerPagerAdapter;
     private SeekBar readerSeekBar;
+    private TextView statusText;
     /**
      * Whether or not the system UI should be auto-hidden after
      * {@link #AUTO_HIDE_DELAY_MILLIS} milliseconds.
@@ -147,14 +149,18 @@ public class ReaderActivity extends AppCompatActivity implements ReaderPagerAdap
                 if (fromUser) {
                     int pageCount = readerPagerAdapter.getContentController().getCurrentPageWords();
                     int pageNumber = progress / pageCount;
-                    readerPagerAdapter.getContentController().setPageCount(pageNumber);
+//                    readerPagerAdapter.getContentController().setPageCount(pageNumber);
+                    //最后一页的逻辑
                     if(progress>=totalWords-pageCount){
                         readerPagerAdapter.getContentController().setContentFromPage(pageNumber-1, totalWords-pageCount);
-                    }else {
+                    }else if(progress<=pageCount){
+                        readerPagerAdapter.getContentController().setContentFromPage(0,0);}
+                    else {
                         readerPagerAdapter.getContentController().setContentFromPage(pageNumber-1, progress);
                     }
-
                     contentPager.setCurrentItem(pageNumber-1);
+                    statusText.setText(String.valueOf(progress/totalWords*100)+"%");
+
                     Log.e("seekbar selected: ", String.valueOf(pageNumber));
                 }
             }
@@ -205,6 +211,7 @@ public class ReaderActivity extends AppCompatActivity implements ReaderPagerAdap
         mControlsView = findViewById(R.id.fullscreen_content_controls);
         contentPager = (ViewPager) findViewById(R.id.contentPager);
         readerSeekBar = (SeekBar) findViewById(R.id.readerSeekBar);
+        statusText = (TextView) findViewById(R.id.statusText);
     }
 
     private void initBroadCast() {
@@ -279,6 +286,7 @@ public class ReaderActivity extends AppCompatActivity implements ReaderPagerAdap
     @Override
     public void upDate(int progress) {
         readerSeekBar.setProgress(progress);
+        statusText.setText(progress/totalWords*100+"%");
     }
 
     class ShowFinishedReceiver extends BroadcastReceiver {
