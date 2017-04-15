@@ -12,10 +12,17 @@ import android.os.Handler;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.PopupMenu;
+import android.text.Layout;
 import android.util.Log;
 import android.view.DragEvent;
+import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.PopupWindow;
 import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -34,6 +41,9 @@ public class ReaderActivity extends AppCompatActivity implements ReaderPagerAdap
     private ReaderPagerAdapter readerPagerAdapter;
     private SeekBar readerSeekBar;
     private TextView statusText;
+    private Button settingMenu;
+    private PopupWindow settingWindow;
+//    private  PopupWindow settingWindow;
     /**
      * Whether or not the system UI should be auto-hidden after
      * {@link #AUTO_HIDE_DELAY_MILLIS} milliseconds.
@@ -160,7 +170,6 @@ public class ReaderActivity extends AppCompatActivity implements ReaderPagerAdap
                     }
                     contentPager.setCurrentItem(pageNumber-1);
                     statusText.setText(String.valueOf(progress/totalWords*100)+"%");
-
                     Log.e("seekbar selected: ", String.valueOf(pageNumber));
                 }
             }
@@ -212,6 +221,28 @@ public class ReaderActivity extends AppCompatActivity implements ReaderPagerAdap
         contentPager = (ViewPager) findViewById(R.id.contentPager);
         readerSeekBar = (SeekBar) findViewById(R.id.readerSeekBar);
         statusText = (TextView) findViewById(R.id.statusText);
+        settingMenu= (Button) findViewById(R.id.settingMenu);
+        settingMenu.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+              initMenuView();
+            }
+        });
+    }
+
+    private void initMenuView() {
+        if(settingWindow==null){
+            settingWindow = new PopupWindow(ReaderActivity.this);
+            settingWindow.setHeight(contentPager.getHeight()/2);
+            settingWindow.setWidth(ViewGroup.LayoutParams.MATCH_PARENT);
+            final View popuWindowsView =LayoutInflater.from(ReaderActivity.this).inflate(R.layout.readersetting_layout,null);
+            //此处设计画笔菜单
+            settingWindow.setContentView(popuWindowsView);
+        }
+
+        settingWindow.showAtLocation(mControlsView,Gravity.BOTTOM,0,0);
+//        settingWindow.showAsDropDown(settingMenu);
+
     }
 
     private void initBroadCast() {
@@ -255,6 +286,9 @@ public class ReaderActivity extends AppCompatActivity implements ReaderPagerAdap
         // Schedule a runnable to remove the status and navigation bar after a delay
         mHideHandler.removeCallbacks(mShowPart2Runnable);
         mHideHandler.postDelayed(mHidePart2Runnable, UI_ANIMATION_DELAY);
+        if(settingWindow!=null&&settingWindow.isShowing()){
+            settingWindow.dismiss();
+        }
     }
 
     @SuppressLint("InlinedApi")
