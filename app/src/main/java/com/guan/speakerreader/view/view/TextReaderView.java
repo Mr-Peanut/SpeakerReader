@@ -29,15 +29,8 @@ public class TextReaderView extends View {
     public TextReaderView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
         mContext = context;
-        mPaint = new TextPaint();
-        mPaint.setTextSize(50);
-        mPaint.setColor(Color.BLACK);
         drawFinishedIntent = new Intent("DRAW_FINISHED");
         stringBuffer = new StringBuffer();
-    }
-
-    public Paint getmPaint() {
-        return mPaint;
     }
 
     public void setmPaint(Paint mPaint) {
@@ -54,9 +47,6 @@ public class TextReaderView extends View {
 
     @Override
     protected void onDraw(Canvas canvas) {
-        if(mContentController.getmPaint()==null){
-            mContentController.setmPaint(new Paint(mPaint));
-        }
         if( mContentController.getShowHeight()!=getMeasuredHeight() - getPaddingTop() - getPaddingBottom()){
             mContentController.setShowHeight(getMeasuredHeight() - getPaddingTop() - getPaddingBottom());
             mContentController.setShowWidth( getMeasuredWidth() - Math.max(getPaddingLeft(), getPaddingStart()) - Math.max(getPaddingEnd(), getPaddingRight()));

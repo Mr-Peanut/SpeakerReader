@@ -73,10 +73,11 @@ public class ContentController {
     }
 
 
-    public ContentController(String filePath, int totalWords, ReaderPagerAdapter adapter) {
+    public ContentController(String filePath, int totalWords, ReaderPagerAdapter adapter,Paint paint) {
         this.filePath = filePath;
         this.totalWords = totalWords;
         this.mAdapter = adapter;
+        this.mPaint=paint;
         pageContent = new SparseArray<>();
         pageStart = new SparseIntArray();
         pageEnd = new SparseIntArray();
@@ -253,7 +254,7 @@ public class ContentController {
     }
 
     public void reMeasure(Paint newPaint) {
-        mPaint = new Paint(newPaint);
+        mPaint=newPaint;
         measurePreUtil.setmPaint(mPaint);
         pagesArrangeUtil.setmPaint(mPaint);
         pageContent.clear();

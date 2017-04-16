@@ -1,6 +1,7 @@
 package com.guan.speakerreader.view.adapter;
 
 import android.content.Context;
+import android.graphics.Paint;
 import android.support.v4.view.PagerAdapter;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -23,6 +24,7 @@ public class ReaderPagerAdapter extends PagerAdapter implements View.OnClickList
     private ContentController contentController;
     private Context mContext;
     private String filePath;
+    private Paint mPaint;
 
     public void setmUpdateSeekBarController(UpdateSeekBarController mUpdateSeekBarController) {
         this.mUpdateSeekBarController = mUpdateSeekBarController;
@@ -42,11 +44,12 @@ public class ReaderPagerAdapter extends PagerAdapter implements View.OnClickList
     public void setContentController(ContentController contentController) {
         this.contentController = contentController;
     }
-    public ReaderPagerAdapter(Context mContext,String filePath,int totalWords) {
+    public ReaderPagerAdapter(Context mContext,String filePath,int totalWords,Paint paint) {
         this.mContext = mContext;
         this.filePath=filePath;
+        this.mPaint = paint;
         viewList=new ArrayList<>();
-        contentController=new ContentController(filePath,totalWords,this);
+        contentController=new ContentController(filePath,totalWords,this,mPaint);
     }
     @Override
     public Object instantiateItem(ViewGroup container, int position) {
@@ -62,6 +65,7 @@ public class ReaderPagerAdapter extends PagerAdapter implements View.OnClickList
         ((TextView)(view.findViewById(R.id.foot))).setText("第"+position+"页");
         textReaderView.setPosition(position);
         textReaderView.setmContentController(contentController);
+        textReaderView.setmPaint(mPaint);
         container.addView(view);
         view.setOnClickListener(this);
         textReaderView.invalidate();
@@ -89,15 +93,10 @@ public class ReaderPagerAdapter extends PagerAdapter implements View.OnClickList
     private int getTotalPage() {
         return contentController.getPageCount();
     }
-
     @Override
     public boolean isViewFromObject(View view, Object object) {
         return view ==object;
     }
-    public void insertPage(int position){
-
-    }
-
     @Override
     public void onClick(View v) {
         mInnerViewOnClickedListener.onClicked();

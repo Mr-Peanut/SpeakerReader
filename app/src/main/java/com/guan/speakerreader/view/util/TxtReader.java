@@ -1,11 +1,16 @@
 package com.guan.speakerreader.view.util;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 
 public class TxtReader {
@@ -82,17 +87,13 @@ public class TxtReader {
             inputStream = new FileInputStream(new File(filePath));
             reader = new InputStreamReader(inputStream, getCodeType(filePath));
             char[] buffer = new char[bufferLength];
-            int temp = 0;
+            int temp ;
             int marked = 0;
             while ((temp = reader.read(buffer)) != -1) {
                 readTimes++;
                 marked = temp;
             }
             result = readTimes * bufferLength + marked;
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
@@ -111,6 +112,35 @@ public class TxtReader {
         }
         return result;
     }
-
-
+    public static int formatTxtFile(String originalPath,String resultPath ){
+        return formatTxtFile(new File(originalPath),new File(resultPath));
+    }
+    public static int formatTxtFile(File originalFile,File resultFile ){
+        String codeType ;
+        int totalWords=0;
+        try {
+            codeType = getCodeType(originalFile);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return 0;
+        }
+        try (
+        FileInputStream fileInputStream=new FileInputStream(originalFile) ;
+        InputStreamReader inputStreamReader=new InputStreamReader(fileInputStream,codeType);
+        BufferedReader bufferedReader=new BufferedReader(inputStreamReader);
+        FileOutputStream fileOutputStream=new FileOutputStream(resultFile,true);
+        OutputStreamWriter outPutStreamWriter=new OutputStreamWriter(fileOutputStream,codeType);
+        BufferedWriter bufferedWriter =new BufferedWriter(outPutStreamWriter)){
+            String temp;
+            while ((temp=bufferedReader.readLine())!=null){
+                bufferedWriter.write(temp);
+                bufferedWriter.write('\n');
+                totalWords+=temp.length()+1;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            return 0;
+        }
+        return totalWords;
+    }
 }

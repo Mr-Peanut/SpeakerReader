@@ -6,8 +6,11 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
@@ -31,6 +34,9 @@ import com.guan.speakerreader.R;
 import com.guan.speakerreader.view.adapter.ReaderPagerAdapter;
 import com.guan.speakerreader.view.util.TxtReader;
 
+import java.io.File;
+import java.io.IOException;
+
 
 public class ReaderActivity extends AppCompatActivity implements ReaderPagerAdapter.InnerViewOnClickedListener, ReaderPagerAdapter.UpdateSeekBarController {
     private ViewPager contentPager;
@@ -43,6 +49,10 @@ public class ReaderActivity extends AppCompatActivity implements ReaderPagerAdap
     private TextView statusText;
     private Button settingMenu;
     private PopupWindow settingWindow;
+    private Paint textPaint;
+    private String targetPath;
+    private String storageCachePath;
+    private AsyncTask<Void, Void, Integer> formatTask;
 //    private  PopupWindow settingWindow;
     /**
      * Whether or not the system UI should be auto-hidden after
@@ -122,14 +132,43 @@ public class ReaderActivity extends AppCompatActivity implements ReaderPagerAdap
         initPath();
         initBroadCast();
         initView();
+        initPaint();
         getTotalWords();
+    }
+
+    private void initPaint() {
+        if(textPaint==null){
+            textPaint=new Paint();
+            //默认值
+            textPaint.setTextSize(35);
+            textPaint.setColor(Color.BLACK);
+        }
     }
 
     private void getTotalWords() {
         if (totalWords == 0) {
-            new AsyncTask<Void, Void, Integer>() {
+            //格式化文本，新建一个缓存文件，将源文件读取到缓存文件中，并替换掉当中的\r\n为\n（要新建一个工具类）
+            //注意删除该条记录的时候要将缓存文件删除
+            formatTask=new AsyncTask<Void, Void, Integer>() {
                 @Override
                 protected Integer doInBackground(Void... params) {
+                    File originalFile =new File(textPath);
+                    File resultFile=new File(storageCachePath+File.separator+originalFile.getName());
+                    if(resultFile.exists()){
+                        targetPath=resultFile.getAbsolutePath();
+                       return TxtReader.getTotalWords(resultFile.getAbsolutePath());
+                    }else {
+                        try {
+                         resultFile.createNewFile();
+                               targetPath=resultFile.getAbsolutePath();
+                            return TxtReader.formatTxtFile(originalFile,resultFile);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                           resultFile.deleteOnExit();
+                        }
+                    }
+                    //当无法建立格式化文件时，读取原始文件；
+                    targetPath=textPath;
                     return TxtReader.getTotalWords(textPath);
                 }
 
@@ -146,13 +185,14 @@ public class ReaderActivity extends AppCompatActivity implements ReaderPagerAdap
                     getTotalWordsDialog.show();
                     super.onPreExecute();
                 }
-            }.execute();
+            };
+            formatTask.execute();
         }
     }
 
     private void initAdapter() {
         readerSeekBar.setMax(totalWords);
-        readerPagerAdapter = new ReaderPagerAdapter(this, textPath, totalWords);
+        readerPagerAdapter = new ReaderPagerAdapter(this, targetPath, totalWords,textPaint);
         readerSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -212,6 +252,16 @@ public class ReaderActivity extends AppCompatActivity implements ReaderPagerAdap
 
     private void initPath() {
         textPath = getIntent().getStringExtra("FILEPATH");
+        String appName;
+         appName= String.valueOf(getApplicationContext().getPackageManager().getApplicationLabel(getApplicationInfo()));
+        if(appName==null){
+            appName=getApplicationContext().getString(R.string.app_name);
+        }
+        File storageCache =new File(Environment.getExternalStorageDirectory()+File.separator+appName);
+        if(!storageCache.exists()){
+           storageCache.mkdirs();
+        }
+        storageCachePath=storageCache.getAbsolutePath();
     }
 
 
