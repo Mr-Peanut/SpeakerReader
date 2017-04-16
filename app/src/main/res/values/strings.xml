@@ -16,4 +16,7 @@
     <string name="dummy_button">Dummy Button</string>
     <string name="dummy_content">DUMMY\nCONTENT</string>
     <string name="settingMenu">设置</string>
+    <string name="lightAdjust">亮度调节</string>
+    <string name="sizeChosen">字号</string>
+    <string name="backgroundSelector">背景选择</string>
 </resources>

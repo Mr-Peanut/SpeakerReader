@@ -15,6 +15,8 @@ import com.guan.speakerreader.view.view.TextReaderView;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Created by guans on 2017/4/4.
  */
@@ -25,6 +27,7 @@ public class ReaderPagerAdapter extends PagerAdapter implements View.OnClickList
     private Context mContext;
     private String filePath;
     private Paint mPaint;
+    private List<View> instantiatedViews;
 
     public void setmUpdateSeekBarController(UpdateSeekBarController mUpdateSeekBarController) {
         this.mUpdateSeekBarController = mUpdateSeekBarController;
@@ -50,6 +53,7 @@ public class ReaderPagerAdapter extends PagerAdapter implements View.OnClickList
         this.mPaint = paint;
         viewList=new ArrayList<>();
         contentController=new ContentController(filePath,totalWords,this,mPaint);
+        instantiatedViews=new ArrayList<>();
     }
     @Override
     public Object instantiateItem(ViewGroup container, int position) {
@@ -66,9 +70,10 @@ public class ReaderPagerAdapter extends PagerAdapter implements View.OnClickList
         textReaderView.setPosition(position);
         textReaderView.setmContentController(contentController);
         textReaderView.setmPaint(mPaint);
+        instantiatedViews.add(view);
         container.addView(view);
         view.setOnClickListener(this);
-        textReaderView.invalidate();
+//        textReaderView.invalidate();
         return view;
     }
 
@@ -82,7 +87,13 @@ public class ReaderPagerAdapter extends PagerAdapter implements View.OnClickList
         View view= (View) object;
         container.removeView(view);
         view.setOnClickListener(null);
+        instantiatedViews.remove(view);
         viewList.add(new WeakReference<>(view));
+    }
+    public void invalidateViews(){
+        for(View childView:instantiatedViews){
+            childView.invalidate();
+        }
     }
 
     @Override

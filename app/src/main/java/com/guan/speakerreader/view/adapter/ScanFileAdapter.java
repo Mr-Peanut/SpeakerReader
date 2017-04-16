@@ -141,6 +141,10 @@ public class ScanFileAdapter extends RecyclerView.Adapter<ScanFileAdapter.FileHo
         holder.fileItem.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if(scanFileTask!=null&&isTaskOn()){
+                    scanFileTask.cancel(true);
+                    taskOn=false;
+                }
                 mFileItemOnClickedListener.onItemClicked(files.get(position));
             }
         });
@@ -173,5 +177,4 @@ public class ScanFileAdapter extends RecyclerView.Adapter<ScanFileAdapter.FileHo
             fileIcon = (ImageView) itemView.findViewById(R.id.fileItemIcon);
         }
     }
-
 }

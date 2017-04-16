@@ -6,6 +6,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.database.DataSetObserver;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.AsyncTask;
@@ -24,11 +25,15 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.PopupWindow;
 import android.widget.ProgressBar;
 import android.widget.SeekBar;
+import android.widget.Spinner;
+import android.widget.SpinnerAdapter;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.guan.speakerreader.R;
 import com.guan.speakerreader.view.adapter.ReaderPagerAdapter;
@@ -36,6 +41,9 @@ import com.guan.speakerreader.view.util.TxtReader;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 
 public class ReaderActivity extends AppCompatActivity implements ReaderPagerAdapter.InnerViewOnClickedListener, ReaderPagerAdapter.UpdateSeekBarController {
@@ -47,13 +55,11 @@ public class ReaderActivity extends AppCompatActivity implements ReaderPagerAdap
     private ReaderPagerAdapter readerPagerAdapter;
     private SeekBar readerSeekBar;
     private TextView statusText;
-    private Button settingMenu;
     private PopupWindow settingWindow;
     private Paint textPaint;
     private String targetPath;
     private String storageCachePath;
-    private AsyncTask<Void, Void, Integer> formatTask;
-//    private  PopupWindow settingWindow;
+    //    private  PopupWindow settingWindow;
     /**
      * Whether or not the system UI should be auto-hidden after
      * {@link #AUTO_HIDE_DELAY_MILLIS} milliseconds.
@@ -140,8 +146,9 @@ public class ReaderActivity extends AppCompatActivity implements ReaderPagerAdap
         if(textPaint==null){
             textPaint=new Paint();
             //默认值
-            textPaint.setTextSize(35);
+            textPaint.setTextSize(55.0f);
             textPaint.setColor(Color.BLACK);
+            textPaint.setAntiAlias(true);
         }
     }
 
@@ -149,26 +156,26 @@ public class ReaderActivity extends AppCompatActivity implements ReaderPagerAdap
         if (totalWords == 0) {
             //格式化文本，新建一个缓存文件，将源文件读取到缓存文件中，并替换掉当中的\r\n为\n（要新建一个工具类）
             //注意删除该条记录的时候要将缓存文件删除
-            formatTask=new AsyncTask<Void, Void, Integer>() {
+            AsyncTask<Void, Void, Integer> formatTask = new AsyncTask<Void, Void, Integer>() {
                 @Override
                 protected Integer doInBackground(Void... params) {
-                    File originalFile =new File(textPath);
-                    File resultFile=new File(storageCachePath+File.separator+originalFile.getName());
-                    if(resultFile.exists()){
-                        targetPath=resultFile.getAbsolutePath();
-                       return TxtReader.getTotalWords(resultFile.getAbsolutePath());
-                    }else {
+                    File originalFile = new File(textPath);
+                    File resultFile = new File(storageCachePath + File.separator + originalFile.getName());
+                    if (resultFile.exists()) {
+                        targetPath = resultFile.getAbsolutePath();
+                        return TxtReader.getTotalWords(resultFile.getAbsolutePath());
+                    } else {
                         try {
-                         resultFile.createNewFile();
-                               targetPath=resultFile.getAbsolutePath();
-                            return TxtReader.formatTxtFile(originalFile,resultFile);
+                            resultFile.createNewFile();
+                            targetPath = resultFile.getAbsolutePath();
+                            return TxtReader.formatTxtFile(originalFile, resultFile);
                         } catch (IOException e) {
                             e.printStackTrace();
-                           resultFile.deleteOnExit();
+                            resultFile.deleteOnExit();
                         }
                     }
                     //当无法建立格式化文件时，读取原始文件；
-                    targetPath=textPath;
+                    targetPath = textPath;
                     return TxtReader.getTotalWords(textPath);
                 }
 
@@ -178,6 +185,7 @@ public class ReaderActivity extends AppCompatActivity implements ReaderPagerAdap
                     initAdapter();
                     getTotalWordsDialog.dismiss();
                 }
+
                 @Override
                 protected void onPreExecute() {
                     getTotalWordsDialog = new ProgressDialog(ReaderActivity.this);
@@ -271,7 +279,7 @@ public class ReaderActivity extends AppCompatActivity implements ReaderPagerAdap
         contentPager = (ViewPager) findViewById(R.id.contentPager);
         readerSeekBar = (SeekBar) findViewById(R.id.readerSeekBar);
         statusText = (TextView) findViewById(R.id.statusText);
-        settingMenu= (Button) findViewById(R.id.settingMenu);
+        Button settingMenu = (Button) findViewById(R.id.settingMenu);
         settingMenu.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -287,12 +295,61 @@ public class ReaderActivity extends AppCompatActivity implements ReaderPagerAdap
             settingWindow.setWidth(ViewGroup.LayoutParams.MATCH_PARENT);
             final View popuWindowsView =LayoutInflater.from(ReaderActivity.this).inflate(R.layout.readersetting_layout,null);
             //此处设计画笔菜单
+            SeekBar lightAdjuster = (SeekBar) popuWindowsView.findViewById(R.id.lightAdjuster);
+            lightAdjuster.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                @Override
+                public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                    if(fromUser){
+                        //调节亮度
+                    }
+                }
+
+                @Override
+                public void onStartTrackingTouch(SeekBar seekBar) {
+
+                }
+
+                @Override
+                public void onStopTrackingTouch(SeekBar seekBar) {
+
+                }
+            });
+            Spinner textSizeSelector = (Spinner) popuWindowsView.findViewById(R.id.textSizeSpinner);
+
+//            String[] textSize=getApplicationContext().getResources().getStringArray(R.array.textSize);
+//            List<String> textSizeList= Arrays.asList(textSize);
+//            textSizeSelector.setSelection(textSizeList.indexOf(String.valueOf(textPaint.getTextSize())));
+            textSizeSelector.setOnItemSelectedListener(new Spinner.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                    float textSize=Float.parseFloat((String)parent.getSelectedItem());
+                    if(textSize!=textPaint.getTextSize())
+                    textPaint.setTextSize(textSize);
+                    readerPagerAdapter.getContentController().reMeasure();
+                    readerPagerAdapter.getContentController().notifyPageChanged(contentPager.getCurrentItem());
+                    readerPagerAdapter.invalidateViews();
+                }
+                @Override
+                public void onNothingSelected(AdapterView<?> parent) {
+
+                }
+            });
+            initBackgroundSelectedView(popuWindowsView);
             settingWindow.setContentView(popuWindowsView);
         }
-
         settingWindow.showAtLocation(mControlsView,Gravity.BOTTOM,0,0);
 //        settingWindow.showAsDropDown(settingMenu);
 
+    }
+
+    private void initBackgroundSelectedView(View view) {
+        BackgroundSelectorListener listener=new BackgroundSelectorListener();
+        TextView black= (TextView) view.findViewById(R.id.black);
+        TextView yellow= (TextView) view.findViewById(R.id.yellow);
+        TextView white= (TextView) view.findViewById(R.id.white);
+        black.setOnClickListener(listener);
+        yellow.setOnClickListener(listener);
+        white.setOnClickListener(listener);
     }
 
     private void initBroadCast() {
@@ -376,6 +433,16 @@ public class ReaderActivity extends AppCompatActivity implements ReaderPagerAdap
     class ShowFinishedReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
+        }
+    }
+    class BackgroundSelectorListener implements View.OnClickListener{
+
+        @Override
+        public void onClick(View v) {
+            contentPager.setBackground(v.getBackground());
+            textPaint.setColor(((TextView)v).getPaint().getColor());
+            contentPager.invalidate();
+           ReaderActivity.this.hide();
         }
     }
 }

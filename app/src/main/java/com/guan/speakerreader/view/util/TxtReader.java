@@ -133,6 +133,8 @@ public class TxtReader {
         BufferedWriter bufferedWriter =new BufferedWriter(outPutStreamWriter)){
             String temp;
             while ((temp=bufferedReader.readLine())!=null){
+                if(temp.length()==0)
+                    continue;
                 bufferedWriter.write(temp);
                 bufferedWriter.write('\n');
                 totalWords+=temp.length()+1;

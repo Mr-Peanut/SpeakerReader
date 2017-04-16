@@ -253,10 +253,7 @@ public class ContentController {
         notifyPageChanged(pageNumberOnShow);
     }
 
-    public void reMeasure(Paint newPaint) {
-        mPaint=newPaint;
-        measurePreUtil.setmPaint(mPaint);
-        pagesArrangeUtil.setmPaint(mPaint);
+    public void reMeasure() {
         pageContent.clear();
         pageStart.clear();
         pageEnd.clear();
