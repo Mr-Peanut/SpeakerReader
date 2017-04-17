@@ -3,6 +3,7 @@ package com.guan.speakerreader.view.view;
 import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -13,6 +14,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.provider.Settings;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -25,8 +27,11 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.PopupWindow;
 import android.widget.ProgressBar;
 import android.widget.SeekBar;
@@ -296,24 +301,8 @@ public class ReaderActivity extends AppCompatActivity implements ReaderPagerAdap
             final View popuWindowsView =LayoutInflater.from(ReaderActivity.this).inflate(R.layout.readersetting_layout,null);
             //此处设计画笔菜单
             SeekBar lightAdjuster = (SeekBar) popuWindowsView.findViewById(R.id.lightAdjuster);
-            lightAdjuster.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-                @Override
-                public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                    if(fromUser){
-                        //调节亮度
-                    }
-                }
-
-                @Override
-                public void onStartTrackingTouch(SeekBar seekBar) {
-
-                }
-
-                @Override
-                public void onStopTrackingTouch(SeekBar seekBar) {
-
-                }
-            });
+            CheckBox checkBox= (CheckBox) popuWindowsView.findViewById(R.id.fitSystemLightness);
+            setScreenLightness(checkBox,lightAdjuster);
             Spinner textSizeSelector = (Spinner) popuWindowsView.findViewById(R.id.textSizeSpinner);
 
 //            String[] textSize=getApplicationContext().getResources().getStringArray(R.array.textSize);
@@ -342,6 +331,66 @@ public class ReaderActivity extends AppCompatActivity implements ReaderPagerAdap
 
     }
 
+    private void setScreenLightness(final CheckBox checkBox, final SeekBar lightAdjuster) {
+        lightAdjuster.setMax(255);
+        lightAdjuster.setProgress(getSystemLightness());
+        checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if(isChecked){
+                    lightAdjuster.setProgress(getSystemLightness());
+                    setLightness(lightAdjuster.getProgress());
+                }
+            }
+        });
+        //设置当跟随系统时无法拖动
+        lightAdjuster.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if(checkBox.isChecked())
+                return true;
+                else
+                    return false;
+            }
+        });
+        lightAdjuster.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                   if(fromUser){
+                       setLightness(progress);
+                   }
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
+    }
+    private int getSystemLightness() {
+        int systemLightness=0;
+        ContentResolver contentResolver=getContentResolver();
+        try {
+            systemLightness= Settings.System.getInt(contentResolver, Settings.System.SCREEN_BRIGHTNESS);
+        } catch (Settings.SettingNotFoundException e) {
+            e.printStackTrace();
+        }
+        //获取系统亮度
+        return  systemLightness;
+    }
+
+    private void setLightness(int progress) {
+        WindowManager.LayoutParams windowManagerLayoutParams=getWindow().getAttributes();
+        windowManagerLayoutParams.screenBrightness=(progress/255f);
+        getWindow().setAttributes(windowManagerLayoutParams);
+    }
+
+
     private void initBackgroundSelectedView(View view) {
         BackgroundSelectorListener listener=new BackgroundSelectorListener();
         TextView black= (TextView) view.findViewById(R.id.black);
@@ -362,6 +411,7 @@ public class ReaderActivity extends AppCompatActivity implements ReaderPagerAdap
     protected void onDestroy() {
         if (showFinishedReceiver != null)
             unregisterReceiver(showFinishedReceiver);
+        //数据库添加位置记录
         super.onDestroy();
     }
 

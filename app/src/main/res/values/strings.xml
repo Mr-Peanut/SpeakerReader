@@ -19,4 +19,5 @@
     <string name="lightAdjust">亮度调节</string>
     <string name="sizeChosen">字号</string>
     <string name="backgroundSelector">背景选择</string>
+    <string name="fitSystemLightness">跟随系统</string>
 </resources>
