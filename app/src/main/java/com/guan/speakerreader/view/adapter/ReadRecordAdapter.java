@@ -19,7 +19,7 @@ import com.guan.speakerreader.R;
  */
 
 public class ReadRecordAdapter extends RecyclerView.Adapter<ReadRecordAdapter.MHolder> {
-    private final static String TABLE_NAME = "ReadRecored";
+    private final static String TABLE_NAME = "ReadRecord";
     private Context context;
     private SQLiteOpenHelper mHelper;
     private ItemOnClickedListener mItemOnClickedListener;
@@ -34,7 +34,7 @@ public class ReadRecordAdapter extends RecyclerView.Adapter<ReadRecordAdapter.MH
         getData();
     }
 
-    public void setmItemOnLongClickedListener(ItemOnLongClickedListener mItemOnLongClickedListener) {
+    public void setItemOnLongClickedListener(ItemOnLongClickedListener mItemOnLongClickedListener) {
         this.mItemOnLongClickedListener = mItemOnLongClickedListener;
     }
 
@@ -48,7 +48,7 @@ public class ReadRecordAdapter extends RecyclerView.Adapter<ReadRecordAdapter.MH
         return recordCursor;
     }
 
-    public void setmItemOnClickedListener(ItemOnClickedListener mItemOnClickedListener) {
+    public void setItemOnClickedListener(ItemOnClickedListener mItemOnClickedListener) {
         this.mItemOnClickedListener = mItemOnClickedListener;
     }
 
@@ -105,13 +105,13 @@ public class ReadRecordAdapter extends RecyclerView.Adapter<ReadRecordAdapter.MH
         deleteItemText.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ReadRecordAdapter.this.deletDataItem(position);
+                ReadRecordAdapter.this.deleteDataItem(position);
 //                mDeleteItemOnClickedListener.onDeleteClick(position);
             }
         });
     }
 
-    public void deletDataItem(int position) {
+    public void deleteDataItem(int position) {
         recordCursor.moveToPosition(recordCursor.getCount() - position - 1);
         mDatabase.delete(TABLE_NAME, "_id=?", new String[]{String.valueOf(recordCursor.getLong(recordCursor.getColumnIndex("_id")))});
         notifyDataChanged();
@@ -134,15 +134,15 @@ public class ReadRecordAdapter extends RecyclerView.Adapter<ReadRecordAdapter.MH
     }
 
     public interface ItemOnClickedListener {
-        void onRecordItemClick(int postion);
+        void onRecordItemClick(int position);
     }
 
     public interface DeleteItemOnClickedListener {
-        void onDeleteClick(int positon);
+        void onDeleteClick(int position);
     }
 
     public interface ItemOnLongClickedListener {
-        boolean onItemLongClicked(int postion, View view);
+        boolean onItemLongClicked(int position, View view);
     }
 
     class MHolder extends RecyclerView.ViewHolder {

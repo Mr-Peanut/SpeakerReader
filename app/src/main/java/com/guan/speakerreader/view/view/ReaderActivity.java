@@ -380,7 +380,9 @@ public class ReaderActivity extends AppCompatActivity implements ReaderPagerAdap
         } catch (Settings.SettingNotFoundException e) {
             e.printStackTrace();
         }
-        //获取系统亮度
+        //获取系统亮度当系统亮度为自动调节时，获取值为-1，此处应该怎样处理？
+        if(systemLightness<0)
+            return -1*systemLightness;
         return  systemLightness;
     }
 

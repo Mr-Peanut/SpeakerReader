@@ -15,7 +15,7 @@ import android.widget.Button;
 
 import com.guan.speakerreader.R;
 import com.guan.speakerreader.view.adapter.ReadRecordAdapter;
-import com.guan.speakerreader.view.database.RecoredDatabaseHelper;
+import com.guan.speakerreader.view.database.RecordDatabaseHelper;
 
 public class WelcomeActivity extends AppCompatActivity implements ReadRecordAdapter.ItemOnClickedListener, ReadRecordAdapter.ItemOnLongClickedListener {
     public final static String CHOOSE_FILE_ACTION = "FILE_CHOOSE";
@@ -40,7 +40,7 @@ public class WelcomeActivity extends AppCompatActivity implements ReadRecordAdap
      */
     private void initData() {
         if (recordDatabaseHelper == null) {
-            recordDatabaseHelper = new RecoredDatabaseHelper(this, "recordDatabase", null, 1);
+            recordDatabaseHelper = new RecordDatabaseHelper(this, "recordDatabase", null, 1);
         }
         new AsyncTask<Void, Void, Void>() {
             @Override
@@ -54,8 +54,8 @@ public class WelcomeActivity extends AppCompatActivity implements ReadRecordAdap
                 super.onPostExecute(aVoid);
                 if (readRecordAdapter == null) {
                     readRecordAdapter = new ReadRecordAdapter(WelcomeActivity.this, recordDatabaseHelper);
-                    readRecordAdapter.setmItemOnClickedListener(WelcomeActivity.this);
-                    readRecordAdapter.setmItemOnLongClickedListener(WelcomeActivity.this);
+                    readRecordAdapter.setItemOnClickedListener(WelcomeActivity.this);
+                    readRecordAdapter.setItemOnLongClickedListener(WelcomeActivity.this);
                     RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(WelcomeActivity.this, LinearLayoutManager.VERTICAL, false);
                     recordList.setLayoutManager(layoutManager);
 //            readRecordAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
@@ -116,7 +116,7 @@ public class WelcomeActivity extends AppCompatActivity implements ReadRecordAdap
             public boolean onMenuItemClick(MenuItem item) {
                 switch (item.getItemId()) {
                     case R.id.delete:
-                        readRecordAdapter.deletDataItem(position);
+                        readRecordAdapter.deleteDataItem(position);
                         break;
                     case R.id.open:
                         WelcomeActivity.this.openReaderActivity(position);

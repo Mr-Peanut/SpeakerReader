@@ -9,20 +9,20 @@ import android.database.sqlite.SQLiteOpenHelper;
  * Created by guans on 2017/3/6.
  */
 
-public class RecoredDatabaseHelper extends SQLiteOpenHelper {
-    private final static String CREATETABLE = "create table ReadRecored(_id integer primary key autoincrement, filename text,filepath text, preview text, position long)";
+public class RecordDatabaseHelper extends SQLiteOpenHelper {
+    private final static String CREATE_TABLE = "create table ReadRecord(_id integer primary key autoincrement, filename text,filepath text, preview text, position long)";
 
-    public RecoredDatabaseHelper(Context context, String name, SQLiteDatabase.CursorFactory factory, int version) {
+    public RecordDatabaseHelper(Context context, String name, SQLiteDatabase.CursorFactory factory, int version) {
         super(context, name, factory, version);
     }
 
-    public RecoredDatabaseHelper(Context context, String name, SQLiteDatabase.CursorFactory factory, int version, DatabaseErrorHandler errorHandler) {
+    public RecordDatabaseHelper(Context context, String name, SQLiteDatabase.CursorFactory factory, int version, DatabaseErrorHandler errorHandler) {
         super(context, name, factory, version, errorHandler);
     }
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        db.execSQL(CREATETABLE);
+        db.execSQL(CREATE_TABLE);
     }
 
     @Override
