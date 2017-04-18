@@ -4,10 +4,13 @@ import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.DataSetObserver;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.AsyncTask;
@@ -15,6 +18,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.provider.Settings;
+import android.support.annotation.RequiresPermission;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -41,7 +45,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.guan.speakerreader.R;
+import com.guan.speakerreader.view.adapter.ReadRecordAdapter;
 import com.guan.speakerreader.view.adapter.ReaderPagerAdapter;
+import com.guan.speakerreader.view.database.RecordDatabaseHelper;
 import com.guan.speakerreader.view.util.TxtReader;
 
 import java.io.File;
@@ -64,6 +70,7 @@ public class ReaderActivity extends AppCompatActivity implements ReaderPagerAdap
     private Paint textPaint;
     private String targetPath;
     private String storageCachePath;
+    private SQLiteOpenHelper recordDatabaseHelper;
     //    private  PopupWindow settingWindow;
     /**
      * Whether or not the system UI should be auto-hidden after
@@ -136,6 +143,7 @@ public class ReaderActivity extends AppCompatActivity implements ReaderPagerAdap
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_reader);
         mVisible = true;
+        initDataBase();
         // Set up the user interaction to manually show or hide the system UI.
         // Upon interacting with UI controls, delay any scheduled hide()
         // operations to prevent the jarring behavior of controls going away
@@ -145,6 +153,12 @@ public class ReaderActivity extends AppCompatActivity implements ReaderPagerAdap
         initView();
         initPaint();
         getTotalWords();
+    }
+
+    private void initDataBase() {
+        if (recordDatabaseHelper == null) {
+            recordDatabaseHelper = new RecordDatabaseHelper(this, "recordDatabase", null, 1);
+        }
     }
 
     private void initPaint() {
@@ -158,22 +172,37 @@ public class ReaderActivity extends AppCompatActivity implements ReaderPagerAdap
     }
 
     private void getTotalWords() {
+        //第一次阅读时执行，记录中要是有的话从记录中读取数据，不走这条逻辑
         if (totalWords == 0) {
             //格式化文本，新建一个缓存文件，将源文件读取到缓存文件中，并替换掉当中的\r\n为\n（要新建一个工具类）
             //注意删除该条记录的时候要将缓存文件删除
+            //在阅读记录生成前执行该逻辑
             AsyncTask<Void, Void, Integer> formatTask = new AsyncTask<Void, Void, Integer>() {
                 @Override
                 protected Integer doInBackground(Void... params) {
                     File originalFile = new File(textPath);
                     File resultFile = new File(storageCachePath + File.separator + originalFile.getName());
+                    int totalWords;
                     if (resultFile.exists()) {
                         targetPath = resultFile.getAbsolutePath();
-                        return TxtReader.getTotalWords(resultFile.getAbsolutePath());
+                        totalWords=TxtReader.getTotalWords(resultFile.getAbsolutePath());
+                        return totalWords ;
                     } else {
                         try {
                             resultFile.createNewFile();
                             targetPath = resultFile.getAbsolutePath();
-                            return TxtReader.formatTxtFile(originalFile, resultFile);
+                            totalWords=TxtReader.formatTxtFile(originalFile, resultFile);
+                            //下面的代码可以优化到一个方法中
+                            ContentValues values=new ContentValues();
+                            values.put("filename",originalFile.getName());
+                            values.put("filepath",textPath);
+                            values.put("totalWords",totalWords);
+                            values.put("position",0);
+                            values.put("updateTime",System.currentTimeMillis());
+                            SQLiteDatabase recordDB= recordDatabaseHelper.getWritableDatabase();
+                            recordDB .insert(ReadRecordAdapter.TABLE_NAME,null,values);
+                            recordDB.close();
+                            return totalWords;
                         } catch (IOException e) {
                             e.printStackTrace();
                             resultFile.deleteOnExit();
@@ -181,9 +210,9 @@ public class ReaderActivity extends AppCompatActivity implements ReaderPagerAdap
                     }
                     //当无法建立格式化文件时，读取原始文件；
                     targetPath = textPath;
-                    return TxtReader.getTotalWords(textPath);
+                    totalWords=TxtReader.getTotalWords(textPath);
+                    return totalWords;
                 }
-
                 @Override
                 protected void onPostExecute(Integer integer) {
                     totalWords = integer;
@@ -304,7 +333,6 @@ public class ReaderActivity extends AppCompatActivity implements ReaderPagerAdap
             CheckBox checkBox= (CheckBox) popuWindowsView.findViewById(R.id.fitSystemLightness);
             setScreenLightness(checkBox,lightAdjuster);
             Spinner textSizeSelector = (Spinner) popuWindowsView.findViewById(R.id.textSizeSpinner);
-
 //            String[] textSize=getApplicationContext().getResources().getStringArray(R.array.textSize);
 //            List<String> textSizeList= Arrays.asList(textSize);
 //            textSizeSelector.setSelection(textSizeList.indexOf(String.valueOf(textPaint.getTextSize())));
@@ -414,6 +442,13 @@ public class ReaderActivity extends AppCompatActivity implements ReaderPagerAdap
         if (showFinishedReceiver != null)
             unregisterReceiver(showFinishedReceiver);
         //数据库添加位置记录
+        //方法中发送广播让第一个activity 更新列表
+        ContentValues values=new ContentValues();
+        values.put("position",readerPagerAdapter.getContentController().getOnShowStart());
+        values.put("updateTime",System.currentTimeMillis());
+        SQLiteDatabase recordDB= recordDatabaseHelper.getWritableDatabase();
+        recordDB.update(ReadRecordAdapter.TABLE_NAME,values,"filepath=?",new String[]{textPath});
+        recordDB.close();
         super.onDestroy();
     }
 

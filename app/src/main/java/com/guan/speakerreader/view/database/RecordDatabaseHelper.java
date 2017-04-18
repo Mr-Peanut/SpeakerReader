@@ -10,7 +10,8 @@ import android.database.sqlite.SQLiteOpenHelper;
  */
 
 public class RecordDatabaseHelper extends SQLiteOpenHelper {
-    private final static String CREATE_TABLE = "create table ReadRecord(_id integer primary key autoincrement, filename text,filepath text, preview text, position long)";
+    //建表字段id ，文件名，文件路径，预览（当前位置取10个字），总字数，上次阅读位置，上次阅读时间
+    private final static String CREATE_TABLE = "create table ReadRecord(_id integer primary key autoincrement, filename text,filepath text, preview text,totalWords long, position long,updateTime long)";
 
     public RecordDatabaseHelper(Context context, String name, SQLiteDatabase.CursorFactory factory, int version) {
         super(context, name, factory, version);

@@ -18,6 +18,9 @@ public class ContentController {
     private SparseArray<String> pageContent;
     private SparseIntArray pageStart;
     private SparseIntArray pageEnd;
+
+
+
     private int onShowStart;
     private int onShowEnd;
     private MeasurePreUtil measurePreUtil;
@@ -29,15 +32,23 @@ public class ContentController {
     private float showHeight;
     private float showWidth;
     private ReaderPagerAdapter mAdapter;
+    private int currentPageWords;
 
     public int getCurrentPageWords() {
         return currentPageWords;
     }
 
-    private int currentPageWords;
+
 
     public int getPageCount() {
         return pageCount;
+    }
+    public void setOnShowStart(int onShowStart) {
+        this.onShowStart = onShowStart;
+    }
+
+    public int getOnShowStart() {
+        return onShowStart;
     }
 
     public void setPageCount(int pageCount) {

@@ -19,7 +19,7 @@ import com.guan.speakerreader.R;
  */
 
 public class ReadRecordAdapter extends RecyclerView.Adapter<ReadRecordAdapter.MHolder> {
-    private final static String TABLE_NAME = "ReadRecord";
+    public final static String TABLE_NAME = "ReadRecord";
     private Context context;
     private SQLiteOpenHelper mHelper;
     private ItemOnClickedListener mItemOnClickedListener;
@@ -56,7 +56,7 @@ public class ReadRecordAdapter extends RecyclerView.Adapter<ReadRecordAdapter.MH
         if (mDatabase == null)
             mDatabase = mHelper.getReadableDatabase();
         if (recordCursor == null)
-            recordCursor = mDatabase.query(TABLE_NAME, null, null, null, null, null, "_id");
+            recordCursor = mDatabase.query(TABLE_NAME, null, null, null, null, null, "updateTime DESC");
 //        recordCursor.registerContentObserver(new ContentObserver(new Handler(context.getMainLooper())) {
 //            @Override
 //            public void onChange(boolean selfChange) {
@@ -67,7 +67,7 @@ public class ReadRecordAdapter extends RecyclerView.Adapter<ReadRecordAdapter.MH
             @Override
             public void onChanged() {
                 recordCursor.close();
-                recordCursor = mDatabase.query(TABLE_NAME, null, null, null, null, null, "_id");
+                recordCursor = mDatabase.query(TABLE_NAME, null, null, null, null, null, "updateTime DESC");
                 recordCursor.registerDataSetObserver(this);
             }
         });
@@ -83,6 +83,7 @@ public class ReadRecordAdapter extends RecyclerView.Adapter<ReadRecordAdapter.MH
         TextView itemContent = holder.item;
         TextView deleteItemText = holder.deleteItem;
         recordCursor.moveToPosition(recordCursor.getCount() - position - 1);
+        //记录的显示方法
         itemContent.setText(recordCursor.getInt(recordCursor.getColumnIndex("_id")) + " " + recordCursor.getString(recordCursor.getColumnIndex("filename")) + " " + recordCursor.getString(recordCursor.getColumnIndex("preview")));
         itemContent.setOnTouchListener(new View.OnTouchListener() {
             @Override
@@ -124,7 +125,7 @@ public class ReadRecordAdapter extends RecyclerView.Adapter<ReadRecordAdapter.MH
 
     private void notifyDataChanged() {
         recordCursor.close();
-        recordCursor = mDatabase.query(TABLE_NAME, null, null, null, null, null, "_id");
+        recordCursor = mDatabase.query(TABLE_NAME, null, null, null, null, null, "updateTime DESC");
         ReadRecordAdapter.this.notifyDataSetChanged();
     }
 
