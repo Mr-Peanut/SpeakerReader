@@ -70,7 +70,7 @@ public class ReaderActivity extends AppCompatActivity implements ReaderPagerAdap
     private Paint textPaint;
     private String targetPath;
     private String storageCachePath;
-    private SQLiteOpenHelper recordDatabaseHelper;
+    private RecordDatabaseHelper recordDatabaseHelper;
     //    private  PopupWindow settingWindow;
     /**
      * Whether or not the system UI should be auto-hidden after
@@ -193,15 +193,16 @@ public class ReaderActivity extends AppCompatActivity implements ReaderPagerAdap
                             targetPath = resultFile.getAbsolutePath();
                             totalWords=TxtReader.formatTxtFile(originalFile, resultFile);
                             //下面的代码可以优化到一个方法中
-                            ContentValues values=new ContentValues();
-                            values.put("filename",originalFile.getName());
-                            values.put("filepath",textPath);
-                            values.put("totalWords",totalWords);
-                            values.put("position",0);
-                            values.put("updateTime",System.currentTimeMillis());
-                            SQLiteDatabase recordDB= recordDatabaseHelper.getWritableDatabase();
-                            recordDB .insert(ReadRecordAdapter.TABLE_NAME,null,values);
-                            recordDB.close();
+                            recordDatabaseHelper.insert(ReadRecordAdapter.TABLE_NAME,originalFile.getName(),textPath,null,totalWords,0);
+//                            ContentValues values=new ContentValues();
+//                            values.put("filename",originalFile.getName());
+//                            values.put("filepath",textPath);
+//                            values.put("totalWords",totalWords);
+//                            values.put("position",0);
+//                            values.put("updateTime",System.currentTimeMillis());
+//                            SQLiteDatabase recordDB= recordDatabaseHelper.getWritableDatabase();
+//                            recordDB .insert(ReadRecordAdapter.TABLE_NAME,null,values);
+//                            recordDB.close();
                             return totalWords;
                         } catch (IOException e) {
                             e.printStackTrace();
@@ -443,12 +444,13 @@ public class ReaderActivity extends AppCompatActivity implements ReaderPagerAdap
             unregisterReceiver(showFinishedReceiver);
         //数据库添加位置记录
         //方法中发送广播让第一个activity 更新列表
-        ContentValues values=new ContentValues();
-        values.put("position",readerPagerAdapter.getContentController().getOnShowStart());
-        values.put("updateTime",System.currentTimeMillis());
-        SQLiteDatabase recordDB= recordDatabaseHelper.getWritableDatabase();
-        recordDB.update(ReadRecordAdapter.TABLE_NAME,values,"filepath=?",new String[]{textPath});
-        recordDB.close();
+        recordDatabaseHelper.update(ReadRecordAdapter.TABLE_NAME,textPath,null,readerPagerAdapter.getContentController().getOnShowStart());
+//        ContentValues values=new ContentValues();
+//        values.put("position",readerPagerAdapter.getContentController().getOnShowStart());
+//        values.put("updateTime",System.currentTimeMillis());
+//        SQLiteDatabase recordDB= recordDatabaseHelper.getWritableDatabase();
+//        recordDB.update(ReadRecordAdapter.TABLE_NAME,values,"filepath=?",new String[]{textPath});
+//        recordDB.close();
         super.onDestroy();
     }
 

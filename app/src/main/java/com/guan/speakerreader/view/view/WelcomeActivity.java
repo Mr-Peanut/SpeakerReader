@@ -1,6 +1,9 @@
 package com.guan.speakerreader.view.view;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.os.AsyncTask;
@@ -26,13 +29,22 @@ public class WelcomeActivity extends AppCompatActivity implements ReadRecordAdap
     private RecyclerView recordList;
     private SQLiteOpenHelper recordDatabaseHelper;
     private ReadRecordAdapter readRecordAdapter;
-
+    private RecordDBUpdateReceiver recordDBUpdateReceiver;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.welcome_layout);
         initView();
         initData();
+        initReciever();
+    }
+
+    private void initReciever() {
+        if(recordDBUpdateReceiver==null){
+            recordDBUpdateReceiver=new RecordDBUpdateReceiver();
+        }
+        IntentFilter reciverIntentFilter = new IntentFilter("READ_RECORD_DB_UPDATE");
+        registerReceiver(recordDBUpdateReceiver,reciverIntentFilter);
     }
 
     /*
@@ -42,45 +54,15 @@ public class WelcomeActivity extends AppCompatActivity implements ReadRecordAdap
         if (recordDatabaseHelper == null) {
             recordDatabaseHelper = new RecordDatabaseHelper(this, "recordDatabase", null, 1);
         }
-        new AsyncTask<Void, Void, Void>() {
-            @Override
-            protected Void doInBackground(Void... params) {
-//                initDataBase();
-                return null;
-            }
-
-            @Override
-            protected void onPostExecute(Void aVoid) {
-                super.onPostExecute(aVoid);
-                if (readRecordAdapter == null) {
-                    readRecordAdapter = new ReadRecordAdapter(WelcomeActivity.this, recordDatabaseHelper);
-                    readRecordAdapter.setItemOnClickedListener(WelcomeActivity.this);
-                    readRecordAdapter.setItemOnLongClickedListener(WelcomeActivity.this);
-                    RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(WelcomeActivity.this, LinearLayoutManager.VERTICAL, false);
-                    recordList.setLayoutManager(layoutManager);
-//            readRecordAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
-//                @Override
-//                public void onChanged() {
-//                    readRecordAdapter.notifyDataSetChanged();
-//                }
-//            });
-                    recordList.setAdapter(readRecordAdapter);
-                }
-            }
-        }.execute();
+        if (readRecordAdapter == null) {
+            readRecordAdapter = new ReadRecordAdapter(WelcomeActivity.this, recordDatabaseHelper);
+            readRecordAdapter.setItemOnClickedListener(WelcomeActivity.this);
+            readRecordAdapter.setItemOnLongClickedListener(WelcomeActivity.this);
+            RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(WelcomeActivity.this, LinearLayoutManager.VERTICAL, false);
+            recordList.setLayoutManager(layoutManager);
+            recordList.setAdapter(readRecordAdapter);
+        }
     }
-//    private void initDataBase() {
-//        SQLiteDatabase database= recordDatabaseHelper.getWritableDatabase();
-//        for (int i=0;i<=10;i++){
-//            ContentValues values=new ContentValues();
-//            values.put("filename","第"+i+"条数据");
-//            values.put("filepath","123456");
-//            values.put("preview","你好么");
-//            values.put("position","1234");
-//            System.err.println("insert data"+i);
-//            database.insert(TABLE_NAME,null,values);
-//        }
-//    }
 
     /*
     初始化控件
@@ -105,6 +87,13 @@ public class WelcomeActivity extends AppCompatActivity implements ReadRecordAdap
                 startActivity(intent);
             }
         });
+    }
+
+    @Override
+    protected void onDestroy() {
+        if(recordDBUpdateReceiver!=null)
+        unregisterReceiver(recordDBUpdateReceiver);
+        super.onDestroy();
     }
 
     @Override
@@ -144,5 +133,11 @@ public class WelcomeActivity extends AppCompatActivity implements ReadRecordAdap
     @Override
     public void onRecordItemClick(int position) {
         onRecordItemClick(position);
+    }
+    class RecordDBUpdateReceiver extends BroadcastReceiver{
+        @Override
+        public void onReceive(Context context, Intent intent) {
+           readRecordAdapter.notifyDataSetChanged();
+        }
     }
 }
