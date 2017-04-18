@@ -6,12 +6,12 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -36,15 +36,15 @@ public class WelcomeActivity extends AppCompatActivity implements ReadRecordAdap
         setContentView(R.layout.welcome_layout);
         initView();
         initData();
-        initReciever();
+        initReceiver();
     }
 
-    private void initReciever() {
+    private void initReceiver() {
         if(recordDBUpdateReceiver==null){
             recordDBUpdateReceiver=new RecordDBUpdateReceiver();
         }
-        IntentFilter reciverIntentFilter = new IntentFilter("READ_RECORD_DB_UPDATE");
-        registerReceiver(recordDBUpdateReceiver,reciverIntentFilter);
+        IntentFilter receiverIntentFilter = new IntentFilter("READ_RECORD_DB_UPDATE");
+        registerReceiver(recordDBUpdateReceiver,receiverIntentFilter);
     }
 
     /*
@@ -63,7 +63,6 @@ public class WelcomeActivity extends AppCompatActivity implements ReadRecordAdap
             recordList.setAdapter(readRecordAdapter);
         }
     }
-
     /*
     初始化控件
      */
@@ -129,15 +128,16 @@ public class WelcomeActivity extends AppCompatActivity implements ReadRecordAdap
         intent.putExtra("FILEPATH", filePath);
         startActivity(intent);
     }
-
     @Override
     public void onRecordItemClick(int position) {
-        onRecordItemClick(position);
+        //打开readerActivity
+        openReaderActivity(position);
     }
     class RecordDBUpdateReceiver extends BroadcastReceiver{
         @Override
         public void onReceive(Context context, Intent intent) {
-           readRecordAdapter.notifyDataSetChanged();
+            Log.e("WelcomeActivity:","Receive BroadCast");
+           readRecordAdapter.notifyDataChanged();
         }
     }
 }

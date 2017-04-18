@@ -8,6 +8,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.database.Cursor;
 import android.database.DataSetObserver;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
@@ -70,6 +71,7 @@ public class ReaderActivity extends AppCompatActivity implements ReaderPagerAdap
     private Paint textPaint;
     private String targetPath;
     private String storageCachePath;
+    private int marked;
     private RecordDatabaseHelper recordDatabaseHelper;
     //    private  PopupWindow settingWindow;
     /**
@@ -181,28 +183,24 @@ public class ReaderActivity extends AppCompatActivity implements ReaderPagerAdap
                 @Override
                 protected Integer doInBackground(Void... params) {
                     File originalFile = new File(textPath);
-                    File resultFile = new File(storageCachePath + File.separator + originalFile.getName());
+                    File resultFile = new File(storageCachePath + File.separator +originalFile.getName().replace(".txt",""));
                     int totalWords;
                     if (resultFile.exists()) {
                         targetPath = resultFile.getAbsolutePath();
-                        totalWords=TxtReader.getTotalWords(resultFile.getAbsolutePath());
+                        SQLiteDatabase recordDB=recordDatabaseHelper.getReadableDatabase();
+                        Cursor recordCursor=recordDB.query(ReadRecordAdapter.TABLE_NAME,new String[]{"totalWords","position"},"formatPath=?",new String[]{targetPath},null,null,null);
+                        //注意int和long
+                        totalWords=recordCursor.getInt(recordCursor.getColumnIndex("totalWords"));
+                        marked=recordCursor.getInt(recordCursor.getColumnIndex("position"));
                         return totalWords ;
                     } else {
                         try {
                             resultFile.createNewFile();
                             targetPath = resultFile.getAbsolutePath();
                             totalWords=TxtReader.formatTxtFile(originalFile, resultFile);
+                            marked=0;
                             //下面的代码可以优化到一个方法中
-                            recordDatabaseHelper.insert(ReadRecordAdapter.TABLE_NAME,originalFile.getName(),textPath,null,totalWords,0);
-//                            ContentValues values=new ContentValues();
-//                            values.put("filename",originalFile.getName());
-//                            values.put("filepath",textPath);
-//                            values.put("totalWords",totalWords);
-//                            values.put("position",0);
-//                            values.put("updateTime",System.currentTimeMillis());
-//                            SQLiteDatabase recordDB= recordDatabaseHelper.getWritableDatabase();
-//                            recordDB .insert(ReadRecordAdapter.TABLE_NAME,null,values);
-//                            recordDB.close();
+                            recordDatabaseHelper.insert(ReadRecordAdapter.TABLE_NAME,originalFile.getName(),textPath,null,totalWords,0,targetPath);
                             return totalWords;
                         } catch (IOException e) {
                             e.printStackTrace();
@@ -212,6 +210,7 @@ public class ReaderActivity extends AppCompatActivity implements ReaderPagerAdap
                     //当无法建立格式化文件时，读取原始文件；
                     targetPath = textPath;
                     totalWords=TxtReader.getTotalWords(textPath);
+                    recordDatabaseHelper.insert(ReadRecordAdapter.TABLE_NAME,originalFile.getName(),textPath,null,totalWords,0,null);
                     return totalWords;
                 }
                 @Override
@@ -236,6 +235,7 @@ public class ReaderActivity extends AppCompatActivity implements ReaderPagerAdap
     private void initAdapter() {
         readerSeekBar.setMax(totalWords);
         readerPagerAdapter = new ReaderPagerAdapter(this, targetPath, totalWords,textPaint);
+
         readerSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -270,6 +270,15 @@ public class ReaderActivity extends AppCompatActivity implements ReaderPagerAdap
         readerPagerAdapter.setmUpdateSeekBarController(this);
         readerPagerAdapter.setmInnerViewOnClickedListener(this);
         contentPager.setAdapter(readerPagerAdapter);
+        if(marked==0){
+            readerPagerAdapter.getContentController().setPageCount(1);
+            readerPagerAdapter.getContentController().setContentFromPage(0,marked);
+            contentPager.setCurrentItem(0);
+        }else {
+            readerPagerAdapter.getContentController().setPageCount(100);
+            readerPagerAdapter.getContentController().setContentFromPage(99,marked);
+            contentPager.setCurrentItem(99);
+        }
         contentPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
@@ -452,6 +461,17 @@ public class ReaderActivity extends AppCompatActivity implements ReaderPagerAdap
 //        recordDB.update(ReadRecordAdapter.TABLE_NAME,values,"filepath=?",new String[]{textPath});
 //        recordDB.close();
         super.onDestroy();
+    }
+
+    @Override
+    public void onBackPressed() {
+        if(settingWindow!=null&&settingWindow.isShowing()){
+            settingWindow.dismiss();
+            return;
+        }
+//        recordDatabaseHelper.update(ReadRecordAdapter.TABLE_NAME,textPath,null,readerPagerAdapter.getContentController().getOnShowStart());
+        super.onBackPressed();
+        finish();
     }
 
     @Override

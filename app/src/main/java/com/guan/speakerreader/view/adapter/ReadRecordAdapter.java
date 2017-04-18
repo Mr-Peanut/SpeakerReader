@@ -5,6 +5,7 @@ import android.database.Cursor;
 import android.database.DataSetObserver;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.os.Environment;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -13,6 +14,8 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.guan.speakerreader.R;
+
+import java.io.File;
 
 /**
  * Created by guans on 2017/3/6.
@@ -38,7 +41,7 @@ public class ReadRecordAdapter extends RecyclerView.Adapter<ReadRecordAdapter.MH
         this.mItemOnLongClickedListener = mItemOnLongClickedListener;
     }
 
-    public void setmDeleteItemOnClickedListener(DeleteItemOnClickedListener mDeleteItemOnClickedListener) {
+    public void setDeleteItemOnClickedListener(DeleteItemOnClickedListener mDeleteItemOnClickedListener) {
         this.mDeleteItemOnClickedListener = mDeleteItemOnClickedListener;
     }
 
@@ -114,16 +117,22 @@ public class ReadRecordAdapter extends RecyclerView.Adapter<ReadRecordAdapter.MH
 
     public void deleteDataItem(int position) {
         recordCursor.moveToPosition(recordCursor.getCount() - position - 1);
-        mDatabase.delete(TABLE_NAME, "_id=?", new String[]{String.valueOf(recordCursor.getLong(recordCursor.getColumnIndex("_id")))});
-        notifyDataChanged();
+        String formatString = recordCursor.getString(recordCursor.getColumnIndex("formatPath"));
+        if (formatString != null) {
+            File formatFile = new File(formatString);
+            formatFile.delete();
+            mDatabase.delete(TABLE_NAME, "_id=?", new String[]{String.valueOf(recordCursor.getLong(recordCursor.getColumnIndex("_id")))});
+            notifyDataChanged();
+        }
     }
 
     public void cleanAll() {
+        //清除所有的format文件
         mDatabase.delete(TABLE_NAME, null, null);
         notifyDataChanged();
     }
 
-    private void notifyDataChanged() {
+    public void notifyDataChanged() {
         recordCursor.close();
         recordCursor = mDatabase.query(TABLE_NAME, null, null, null, null, null, "updateTime DESC");
         ReadRecordAdapter.this.notifyDataSetChanged();
@@ -138,7 +147,7 @@ public class ReadRecordAdapter extends RecyclerView.Adapter<ReadRecordAdapter.MH
         void onRecordItemClick(int position);
     }
 
-    public interface DeleteItemOnClickedListener {
+    interface DeleteItemOnClickedListener {
         void onDeleteClick(int position);
     }
 
@@ -149,8 +158,7 @@ public class ReadRecordAdapter extends RecyclerView.Adapter<ReadRecordAdapter.MH
     class MHolder extends RecyclerView.ViewHolder {
         TextView item;
         TextView deleteItem;
-
-        public MHolder(View itemView) {
+        MHolder(View itemView) {
             super(itemView);
             item = (TextView) itemView.findViewById(R.id.recordItem);
             deleteItem = (TextView) itemView.findViewById(R.id.deleteItem);
