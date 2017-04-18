@@ -62,6 +62,7 @@ public class MeasurePreUtil {
                 ArrayList<Integer> measureLines = measureParagraph(paragraphs[measureInfo.paragraphNumber]);
                 int size = measureLines.size();
                 for (int j = 1; measureInfo.lineMarked <= size - j; j++) {
+                    //出现了-1的情况
                     wordCount += measureLines.get(size - j);
                 }
             } else {

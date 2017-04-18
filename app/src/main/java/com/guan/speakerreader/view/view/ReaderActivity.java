@@ -188,10 +188,12 @@ public class ReaderActivity extends AppCompatActivity implements ReaderPagerAdap
                     if (resultFile.exists()) {
                         targetPath = resultFile.getAbsolutePath();
                         SQLiteDatabase recordDB=recordDatabaseHelper.getReadableDatabase();
-                        Cursor recordCursor=recordDB.query(ReadRecordAdapter.TABLE_NAME,new String[]{"totalWords","position"},"formatPath=?",new String[]{targetPath},null,null,null);
+                        Cursor recordCursor=recordDB.query(ReadRecordAdapter.TABLE_NAME,null,"formatPath=?",new String[]{targetPath},null,null,null);
                         //注意int和long
+                        recordCursor.moveToFirst();
                         totalWords=recordCursor.getInt(recordCursor.getColumnIndex("totalWords"));
                         marked=recordCursor.getInt(recordCursor.getColumnIndex("position"));
+                        recordCursor.close();
                         return totalWords ;
                     } else {
                         try {
