@@ -1,10 +1,12 @@
 package com.guan.speakerreader.view.view;
 
 import android.annotation.SuppressLint;
+import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
@@ -19,6 +21,7 @@ import android.os.Message;
 import android.provider.Settings;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Gravity;
@@ -188,6 +191,23 @@ public class ReaderActivity extends AppCompatActivity implements ReaderPagerAdap
                 @Override
                 public void handleMessage(Message msg) {
                   //对话框询问
+                    final AlertDialog.Builder chooseDialog=new AlertDialog.Builder(ReaderActivity.this);
+                    chooseDialog.setMessage("已经有该文件的阅读记录，是否从上次阅读的位置开始");
+                    chooseDialog.setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                          fromRecord=true;
+                            notChosen=false;
+                        }
+                    });
+                    chooseDialog.setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            fromRecord=false;
+                            notChosen=false;
+                        }
+                    });
+                    chooseDialog.show();
                 }
             };
             //格式化文本，新建一个缓存文件，将源文件读取到缓存文件中，并替换掉当中的\r\n为\n（要新建一个工具类）
