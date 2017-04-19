@@ -5,7 +5,6 @@ import android.database.Cursor;
 import android.database.DataSetObserver;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.os.Environment;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -158,6 +157,7 @@ public class ReadRecordAdapter extends RecyclerView.Adapter<ReadRecordAdapter.MH
     class MHolder extends RecyclerView.ViewHolder {
         TextView item;
         TextView deleteItem;
+
         MHolder(View itemView) {
             super(itemView);
             item = (TextView) itemView.findViewById(R.id.recordItem);

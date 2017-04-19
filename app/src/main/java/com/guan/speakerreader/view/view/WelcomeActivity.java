@@ -15,10 +15,13 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
 
 import com.guan.speakerreader.R;
 import com.guan.speakerreader.view.adapter.ReadRecordAdapter;
 import com.guan.speakerreader.view.database.RecordDatabaseHelper;
+
+import java.io.File;
 
 public class WelcomeActivity extends AppCompatActivity implements ReadRecordAdapter.ItemOnClickedListener, ReadRecordAdapter.ItemOnLongClickedListener {
     public final static String CHOOSE_FILE_ACTION = "FILE_CHOOSE";
@@ -30,6 +33,8 @@ public class WelcomeActivity extends AppCompatActivity implements ReadRecordAdap
     private SQLiteOpenHelper recordDatabaseHelper;
     private ReadRecordAdapter readRecordAdapter;
     private RecordDBUpdateReceiver recordDBUpdateReceiver;
+    public static final int START_FROM_RECORD=1;
+    public static final int START_FROM_FILE=0;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -124,13 +129,24 @@ public class WelcomeActivity extends AppCompatActivity implements ReadRecordAdap
         Cursor cursor = readRecordAdapter.getRecordCursor();
         cursor.moveToPosition(cursor.getCount() - position - 1);
         String filePath = cursor.getString(cursor.getColumnIndex("filepath"));
+        File targetFile=new File(filePath);
+        if(!targetFile.exists()){
+            Toast.makeText(this,"原始文件不存在，删除记录",Toast.LENGTH_SHORT).show();
+            readRecordAdapter.deleteDataItem(position);
+            return;
+        }
         Intent intent = new Intent(WelcomeActivity.this, ReaderActivity.class);
         intent.putExtra("FILEPATH", filePath);
+        intent.putExtra("totalWords",cursor.getInt(cursor.getColumnIndex("totalWords")));
+        intent.putExtra("formatPath",cursor.getInt(cursor.getColumnIndex("formatPath")));
+        intent.putExtra("position",cursor.getInt(cursor.getColumnIndex("position")));
+        intent.putExtra("StartFlag",START_FROM_RECORD);
         startActivity(intent);
     }
     @Override
     public void onRecordItemClick(int position) {
         //打开readerActivity
+        //先检查原始文件是否存在，不存在删除该条记录
         openReaderActivity(position);
     }
     class RecordDBUpdateReceiver extends BroadcastReceiver{
