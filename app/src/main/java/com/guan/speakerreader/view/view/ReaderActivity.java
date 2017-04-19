@@ -4,29 +4,23 @@ import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
-import android.database.DataSetObserver;
 import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteOpenHelper;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.Message;
 import android.provider.Settings;
-import android.support.annotation.RequiresPermission;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.PopupMenu;
-import android.text.Layout;
 import android.util.Log;
-import android.view.DragEvent;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -38,12 +32,9 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.PopupWindow;
-import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.Spinner;
-import android.widget.SpinnerAdapter;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.guan.speakerreader.R;
 import com.guan.speakerreader.view.adapter.ReadRecordAdapter;
@@ -53,10 +44,6 @@ import com.guan.speakerreader.view.util.TxtReader;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 
 public class ReaderActivity extends AppCompatActivity implements ReaderPagerAdapter.InnerViewOnClickedListener, ReaderPagerAdapter.UpdateSeekBarController {
     private ViewPager contentPager;
@@ -73,6 +60,10 @@ public class ReaderActivity extends AppCompatActivity implements ReaderPagerAdap
     private String storageCachePath;
     private int marked;
     private RecordDatabaseHelper recordDatabaseHelper;
+    //
+    private boolean notChosen =true;
+    private boolean fromRecord=true;
+    private Handler chooseHandler;
     //    private  PopupWindow settingWindow;
     /**
      * Whether or not the system UI should be auto-hidden after
@@ -193,6 +184,12 @@ public class ReaderActivity extends AppCompatActivity implements ReaderPagerAdap
     private void getTotalWords() {
         //第一次阅读时执行，记录中要是有的话从记录中读取数据，不走这条逻辑
         if (totalWords == 0) {
+            chooseHandler=new Handler(){
+                @Override
+                public void handleMessage(Message msg) {
+                  //对话框询问
+                }
+            };
             //格式化文本，新建一个缓存文件，将源文件读取到缓存文件中，并替换掉当中的\r\n为\n（要新建一个工具类）
             //注意删除该条记录的时候要将缓存文件删除
             //在阅读记录生成前执行该逻辑
@@ -203,15 +200,24 @@ public class ReaderActivity extends AppCompatActivity implements ReaderPagerAdap
                     File resultFile = new File(storageCachePath + File.separator + originalFile.getName().replace(".txt", ""));
                     int totalWords;
                     if (resultFile.exists()) {
-                        //进一步优化，当系统中有记录时弹出对话框，提示“系统中已经有记录是否要
+                        //进一步优化，当系统中有记录时弹出对话框，提示“系统中已经有记录是否要从记录中读取
                         targetPath = resultFile.getAbsolutePath();
+                        Message chooseMSG=chooseHandler.obtainMessage();
+                        chooseHandler.sendMessage(chooseMSG);
+                        while (notChosen){
+                        }
                         SQLiteDatabase recordDB = recordDatabaseHelper.getReadableDatabase();
                         Cursor recordCursor = recordDB.query(ReadRecordAdapter.TABLE_NAME, null, "formatPath=?", new String[]{targetPath}, null, null, null);
                         //注意int和long
                         recordCursor.moveToFirst();
                         totalWords = recordCursor.getInt(recordCursor.getColumnIndex("totalWords"));
-                        marked = recordCursor.getInt(recordCursor.getColumnIndex("position"));
+                        if(fromRecord){
+                            marked = recordCursor.getInt(recordCursor.getColumnIndex("position"));
+                        }else {
+                            marked=0;
+                        }
                         recordCursor.close();
+
                         //设置对话框阻塞掉
                         return totalWords;
                     } else {
