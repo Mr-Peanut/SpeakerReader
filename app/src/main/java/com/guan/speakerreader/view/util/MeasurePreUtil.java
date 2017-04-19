@@ -21,6 +21,8 @@ public class MeasurePreUtil {
     private Paint mPaint;
     private float showHeight;
     private float showWidth;
+    //最后一段是不是换行键
+    private boolean isLastEnter;
 
     public MeasurePreUtil(Paint mPaint, float showHeight, float showWidth) {
         this.mPaint = mPaint;
@@ -49,7 +51,8 @@ public class MeasurePreUtil {
         String[] paragraphs = original.split("\n");
         //从后往前一段一段的遍历
         MeasureInfo measureInfo;
-        if(original.charAt(original.length()-1)=='\n'){
+        isLastEnter=original.charAt(original.length()-1)=='\n';
+        if(isLastEnter){
             measureInfo = findRightLine(paragraphs, paragraphs.length - 1, pageLineContain,true,true);
         }else {
             measureInfo = findRightLine(paragraphs, paragraphs.length - 1, pageLineContain,true,false);
@@ -59,14 +62,24 @@ public class MeasurePreUtil {
         for (int i = 1; measureInfo.paragraphNumber <= paragraphs.length - i; i++) {
             //判断是不是选定的段，是的话要加到指定行，不是的话加全段
             if (measureInfo.paragraphNumber == paragraphs.length - i) {
-                ArrayList<Integer> measureLines = measureParagraph(paragraphs[measureInfo.paragraphNumber]);
+                ArrayList<Integer> measureLines;
+                if(i==1&&isLastEnter){
+                    measureLines=measureLastParagraph(paragraphs[measureInfo.paragraphNumber]);
+                }else {
+                    measureLines = measureParagraph(paragraphs[measureInfo.paragraphNumber]);
+                }
                 int size = measureLines.size();
                 for (int j = 1; measureInfo.lineMarked <= size - j; j++) {
                     //出现了-1的情况
                     wordCount += measureLines.get(size - j);
                 }
             } else {
-                wordCount += paragraphs[paragraphs.length - i].length();
+                //回车键,但是如果最后一个字符刚好是回车键呢
+                if(i==1&&!isLastEnter){
+                    wordCount+=paragraphs[paragraphs.length-i].length();
+                }else {
+                    wordCount += paragraphs[paragraphs.length - i].length()+1;
+                }
             }
         }
         return original.substring(original.length() - wordCount);
@@ -96,8 +109,15 @@ public class MeasurePreUtil {
             while (totalWidth < showWidth && wordCount < paragraph.length()) {
                 buffer[0] = paragraph.charAt(wordCount);
                 wordSpace = mPaint.measureText(buffer, 0, 1);
-                if (totalWidth + wordSpace > showWidth)
+                if (totalWidth + wordSpace > showWidth){
+                    if(buffer[0]=='\n'){
+                        wordCount++;
+                        lineWordCount++;
+                        break;
+                    }
                     break;
+                }
+
                 wordCount++;
                 lineWordCount++;
 //                stringBuffer.append(buffer);
@@ -169,7 +189,7 @@ public class MeasurePreUtil {
         }
         int leftLines = containLines - measureLines.size();
         //字数不够
-        if (leftLines <= 0 || paragraphNumber - 1 == 0) {
+        if (leftLines <= 0 || paragraphNumber == 0) {
             return new MeasureInfo(paragraphNumber, measureLines.size() - containLines);
         } else {
             return findRightLine(paragraphs, paragraphNumber - 1, leftLines,false,false);

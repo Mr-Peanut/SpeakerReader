@@ -82,6 +82,7 @@ public class TextReaderView extends View {
             while (totalLineWidth < viewWidth && wordCount <= content.length() - 1) {
                 buffer[0] = content.charAt(wordCount);
                  wordWith = paint.measureText(buffer, 0, 1);
+                //此处可以优化，当最后一个字符是回车键的时候不管空间够不够，都加上，但是不打印回车键，即wordcount++，但是builder不添加
                 if (totalLineWidth + wordWith > viewWidth) {
                     if (buffer[0] == '\n') {
                         wordCount++;

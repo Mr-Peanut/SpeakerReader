@@ -25,6 +25,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -67,6 +68,7 @@ public class ReaderActivity extends AppCompatActivity implements ReaderPagerAdap
     private boolean notChosen =true;
     private boolean fromRecord=true;
     private Handler chooseHandler;
+    private AlertDialog.Builder chooseDialog;
     //    private  PopupWindow settingWindow;
     /**
      * Whether or not the system UI should be auto-hidden after
@@ -191,22 +193,25 @@ public class ReaderActivity extends AppCompatActivity implements ReaderPagerAdap
                 @Override
                 public void handleMessage(Message msg) {
                   //对话框询问
-                    final AlertDialog.Builder chooseDialog=new AlertDialog.Builder(ReaderActivity.this);
-                    chooseDialog.setMessage("已经有该文件的阅读记录，是否从上次阅读的位置开始");
-                    chooseDialog.setPositiveButton("确定", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                          fromRecord=true;
-                            notChosen=false;
-                        }
-                    });
-                    chooseDialog.setNegativeButton("取消", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            fromRecord=false;
-                            notChosen=false;
-                        }
-                    });
+                    if(chooseDialog==null){
+                        chooseDialog=new AlertDialog.Builder(ReaderActivity.this);
+                        chooseDialog.setMessage("已经有该文件的阅读记录，是否从上次阅读的位置开始");
+                        chooseDialog.setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                fromRecord=true;
+                                notChosen=false;
+                            }
+                        });
+                        chooseDialog.setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                fromRecord=false;
+                                notChosen=false;
+                            }
+                        });
+                        chooseDialog.setCancelable(false);
+                    }
                     chooseDialog.show();
                 }
             };
