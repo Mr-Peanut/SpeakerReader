@@ -79,6 +79,7 @@ public class MeasurePreUtil {
                     wordCount+=paragraphs[paragraphs.length-i].length();
                 }else {
                     wordCount += paragraphs[paragraphs.length - i].length()+1;
+                    //
                 }
             }
         }
