@@ -134,6 +134,7 @@ public class ContentController {
                     Log.e("getContent position: ", String.valueOf(position + 1));
                 }
                 if (onShowEnd < totalWords) {
+                    //重复加出错当重画时出错
                     pageCount++;
                     mAdapter.notifyDataSetChanged();
                     getContentNextShow(position);
@@ -169,7 +170,7 @@ public class ContentController {
                     pageContent.put(position + 1, content);
                     pageStart.put(position + 1, onShowEnd + 1);
                     pageEnd.put(position + 1, onShowEnd + content.length());
-                    //当取完后一页还有字，页码加1
+                    //当取完后一页还有字，页码加1加重复了
                     if (onShowEnd + content.length() < totalWords) {
                         pageCount++;
                         mAdapter.notifyDataSetChanged();
@@ -239,7 +240,6 @@ public class ContentController {
         }//此处有大问题的，没有同步更新marked和onShow start的值因此每次取用字数都是从0开始取的
         // 的位置，思路新建一个表，从表中取值
         //从前往后选这个方法可以，但是如果从当中选值的话，这样做不行
-
         if (pageStart.indexOfKey(position) >= 0 && pageEnd.indexOfKey(position) >= 0) {
             onShowStart = pageStart.get(position);
             onShowEnd = pageEnd.get(position);

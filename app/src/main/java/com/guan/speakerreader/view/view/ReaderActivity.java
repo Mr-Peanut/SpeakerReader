@@ -153,12 +153,19 @@ public class ReaderActivity extends AppCompatActivity implements ReaderPagerAdap
         Intent startIntent=getIntent();
         int startIntentFlag=startIntent.getIntExtra("StartFlag",0);
        if(startIntentFlag==WelcomeActivity.START_FROM_FILE){
+           Log.e("startFlag","Start from file");
            getTotalWords();
        }else{
+           Log.e("startFlag","Start from record");
+
            totalWords=startIntent.getIntExtra("totalWords",0);
+           Log.e("totalWords",String.valueOf(totalWords));
            targetPath=startIntent.getStringExtra("formatPath");
+           Log.e("targetPath",targetPath);
            textPath=startIntent.getStringExtra("FILEPATH");
+           Log.e("textPath",textPath);
            marked=startIntent.getIntExtra("position",0);
+           Log.e("marked",String.valueOf(marked));
            if(totalWords==0||targetPath==null||!new File(targetPath).exists()){
                //删除该条记录
                marked=0;
@@ -169,7 +176,6 @@ public class ReaderActivity extends AppCompatActivity implements ReaderPagerAdap
            }
        }
     }
-
     private void initDataBase() {
         if (recordDatabaseHelper == null) {
             recordDatabaseHelper = new RecordDatabaseHelper(this, "recordDatabase", null, 1);
@@ -252,6 +258,10 @@ public class ReaderActivity extends AppCompatActivity implements ReaderPagerAdap
                             totalWords = TxtReader.formatTxtFile(originalFile, resultFile);
                             marked = 0;
                             //下面的代码可以优化到一个方法中
+                            Log.e("insertName",originalFile.getName());
+                            Log.e("insert textPath",textPath);
+                            Log.e("insert totalWords",String.valueOf(totalWords));
+                            Log.e("insert targetPath",targetPath);
                             recordDatabaseHelper.insert(ReadRecordAdapter.TABLE_NAME, originalFile.getName(), textPath, null, totalWords, 0, targetPath);
                             return totalWords;
                         } catch (IOException e) {
@@ -305,9 +315,9 @@ public class ReaderActivity extends AppCompatActivity implements ReaderPagerAdap
                         readerPagerAdapter.getContentController().setContentFromPage(pageNumber - 1, progress);
                     }
                     contentPager.setCurrentItem(pageNumber - 1);
-                    statusText.setText(String.valueOf(progress / totalWords * 100) + "%");
                     Log.e("seekbar selected: ", String.valueOf(pageNumber));
                 }
+                statusText.setText(String.valueOf(progress / totalWords * 100) + "%");
             }
 
             @Override

@@ -131,14 +131,14 @@ public class WelcomeActivity extends AppCompatActivity implements ReadRecordAdap
         String filePath = cursor.getString(cursor.getColumnIndex("filepath"));
         File targetFile=new File(filePath);
         if(!targetFile.exists()){
-            Toast.makeText(this,"原始文件不存在，删除记录",Toast.LENGTH_SHORT).show();
+            Toast.makeText(this,"原始文件不存在，记录被删除",Toast.LENGTH_SHORT).show();
             readRecordAdapter.deleteDataItem(position);
             return;
         }
         Intent intent = new Intent(WelcomeActivity.this, ReaderActivity.class);
         intent.putExtra("FILEPATH", filePath);
         intent.putExtra("totalWords",cursor.getInt(cursor.getColumnIndex("totalWords")));
-        intent.putExtra("formatPath",cursor.getInt(cursor.getColumnIndex("formatPath")));
+        intent.putExtra("formatPath",cursor.getString(cursor.getColumnIndex("formatPath")));
         intent.putExtra("position",cursor.getInt(cursor.getColumnIndex("position")));
         intent.putExtra("StartFlag",START_FROM_RECORD);
         startActivity(intent);

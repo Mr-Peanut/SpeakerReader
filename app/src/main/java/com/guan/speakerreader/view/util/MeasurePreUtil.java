@@ -191,7 +191,7 @@ public class MeasurePreUtil {
         int leftLines = containLines - measureLines.size();
         //字数不够
         if (leftLines <= 0 || paragraphNumber == 0) {
-            return new MeasureInfo(paragraphNumber, measureLines.size() - containLines);
+            return new MeasureInfo(paragraphNumber, measureLines.size() - containLines>=0?measureLines.size() - containLines:0);
         } else {
             return findRightLine(paragraphs, paragraphNumber - 1, leftLines,false,false);
         }
