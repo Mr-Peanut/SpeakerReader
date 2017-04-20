@@ -18,9 +18,6 @@ public class ContentController {
     private SparseArray<String> pageContent;
     private SparseIntArray pageStart;
     private SparseIntArray pageEnd;
-
-
-
     private int onShowStart;
     private int onShowEnd;
     private MeasurePreUtil measurePreUtil;
@@ -33,6 +30,8 @@ public class ContentController {
     private float showWidth;
     private ReaderPagerAdapter mAdapter;
     private int currentPageWords;
+    //每次预加载的最大字数暂时设定为3000，后续可以根据情况调整
+    private int takenWords=3000;
 
     public int getCurrentPageWords() {
         return currentPageWords;
@@ -59,11 +58,11 @@ public class ContentController {
     还要考虑到往前到第0页有字和到最后一页还有字要动态修改页面
      */
 
-    public Paint getmPaint() {
+    public Paint getPaint() {
         return mPaint;
     }
 
-    public void setmPaint(Paint mPaint) {
+    public void setPaint(Paint mPaint) {
         this.mPaint = mPaint;
     }
 
@@ -120,7 +119,7 @@ public class ContentController {
         } else {
             try {
                 //marked 的位置，当position为0时，marked=0，当position为其他数时默认为进度条拖动的位置
-                String content = TxtReader.readerFromText(filePath, marked, 3000);
+                String content = TxtReader.readerFromText(filePath, marked, takenWords);
                 onShowStart = marked;
                 content = measureContent(content);
                 pageContent.put(position, content);
@@ -160,8 +159,9 @@ public class ContentController {
             } else {
                 //对content start和end进行赋值修改
                 try {
-                    String content = TxtReader.readerFromText(filePath, onShowEnd + 1, 3000);
+                    String content = TxtReader.readerFromText(filePath, onShowEnd + 1, takenWords);
                     if (content == null) {
+                        //到头了
                         setPageCount(position + 1);
                         return;
                     }
@@ -186,6 +186,11 @@ public class ContentController {
     }
 
     private void getContentPreShow(int position) {
+        if(position==0||onShowStart==0){
+            //通知不让滑动
+            //可以通知view
+            return;
+        }
         if (pageContent.indexOfKey(position - 1) < 0 && position >= 1) {
             //这一段也有可以优化当已经测量过直接取用测量的
             if (pageStart.indexOfKey(position - 1) >= 0 && pageEnd.indexOfKey(position - 1) >= 0) {
@@ -198,9 +203,9 @@ public class ContentController {
                 try {
                     String content;
                     if (pageStart.indexOfKey(position) >= 0) {
-                        content = TxtReader.readerFromTextPre(filePath, pageStart.get(position) - 3000, 3000);
+                        content = TxtReader.readerFromTextPre(filePath, pageStart.get(position) - takenWords, takenWords);
                     } else {
-                        content = TxtReader.readerFromTextPre(filePath, onShowStart - 3000, 3000);
+                        content = TxtReader.readerFromTextPre(filePath, onShowStart - takenWords, takenWords);
                     }
                     content = measurePreContent(content);
                     pageContent.put(position - 1, content);

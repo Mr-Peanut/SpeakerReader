@@ -153,19 +153,19 @@ public class ReaderActivity extends AppCompatActivity implements ReaderPagerAdap
         Intent startIntent=getIntent();
         int startIntentFlag=startIntent.getIntExtra("StartFlag",0);
        if(startIntentFlag==WelcomeActivity.START_FROM_FILE){
-           Log.e("startFlag","Start from file");
+//           Log.e("startFlag","Start from file");
            getTotalWords();
        }else{
-           Log.e("startFlag","Start from record");
+//           Log.e("startFlag","Start from record");
 
            totalWords=startIntent.getIntExtra("totalWords",0);
-           Log.e("totalWords",String.valueOf(totalWords));
+//           Log.e("totalWords",String.valueOf(totalWords));
            targetPath=startIntent.getStringExtra("formatPath");
-           Log.e("targetPath",targetPath);
+//           Log.e("targetPath",targetPath);
            textPath=startIntent.getStringExtra("FILEPATH");
-           Log.e("textPath",textPath);
+//           Log.e("textPath",textPath);
            marked=startIntent.getIntExtra("position",0);
-           Log.e("marked",String.valueOf(marked));
+//           Log.e("marked",String.valueOf(marked));
            if(totalWords==0||targetPath==null||!new File(targetPath).exists()){
                //删除该条记录
                marked=0;
@@ -355,6 +355,7 @@ public class ReaderActivity extends AppCompatActivity implements ReaderPagerAdap
                 //当最前页还有字数的话设置第0页为第一页
                 //但是要注意如果position发生了改变之前的位置信息也要改变
                 readerPagerAdapter.getContentController().notifyPageChanged(position);
+//                readerSeekBar.setProgress(readerPagerAdapter.getContentController().getOnShowStart());
                 //添加进度条控制
 
             }
